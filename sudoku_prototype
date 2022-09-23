@@ -1,0 +1,131 @@
+
+namespace room
+{
+    public class sudoku
+    {
+        const int n = 3;
+        public int[,] map = new int[n * n, n * n];
+        Random rnd = new Random();
+
+        public void Room()
+        {
+            for (int i = 0; i < n * n; i++)
+            {
+                for (int j = 0; j < n * n; j++)
+                {
+                    map[i, j] = ((i * n + i / n + j) % (n * n) + 1);
+                }
+            }
+        }
+
+        public void Transposition()
+        {
+            int[,] Tmap = new int[n * n, n * n];
+
+            for (int i = 0; i < n * n; i++)
+            {
+                for (int j = 0; j < n * n; j++)
+                {
+                    Tmap[i, j] = map[j, i];
+                }
+            }
+            map = Tmap;
+        }
+
+        public void Line()
+        {
+            int Block = rnd.Next(0, n - 1);
+            int LineOne = rnd.Next(0, n);
+            int LineTwo = rnd.Next(0, n);
+            int Lo = Block * n + LineOne;
+            int Lt = Block * n + LineTwo;
+            for (int j = 0; j < n * n; j++)
+                (map[Lo, j], map[Lt, j]) = (map[Lt, j], map[Lo, j]);
+        }
+
+        public void Column()
+        {
+            int Block = rnd.Next(0, n - 1);
+            int ColumnOne = rnd.Next(0, n);
+            int ColumnTwo = rnd.Next(0, n);
+            int Co = Block * n + ColumnOne;
+            int Ct = Block * n + ColumnTwo;
+            for (int i = 0; i < n * n; i++)
+                (map[i, Co], map[i, Ct]) = (map[i, Co], map[i, Ct]);
+        }
+
+        public void Hide(int level)
+        {
+            Console.WriteLine(level);
+            int chance = 0;
+            if (level == 1)
+            {
+                level = 40;
+            }
+            if (level == 2)
+            {
+                level = 54;
+            }
+            if (level == 3)
+            {
+                level = 61;
+            }
+            Random rnd = new Random();
+                for (int i = 0; i < n * n; i++)
+                {
+                    for (int j = 0; j < n * n; j++)
+                    {
+                            chance = rnd.Next(0, 3);
+                            if (chance == 0)
+                            {
+                                map[i, j] = 0;
+                                level--;
+                            }
+                        }
+                    }
+            }
+        
+
+        public void CreateRoom(int level)
+        {
+            Room();
+            int counter=0;
+            int create = rnd.Next(n * n, n * n * n * n);
+            for (int i = 0; i < create; i++)
+            {
+                Transposition();
+                Line();
+                Column();
+            }
+
+            Hide(level);
+
+            for (int i = 0; i < map.GetLength(0); i++)
+            {
+                for (int j = 0; j < map.GetLength(1); j++)
+                {
+                    if (map[i, j] != 0)
+                    {
+                        Console.Write(map[i, j] + "\t");
+                        
+                    }
+                    else
+                    {
+                        Console.Write("| |" + "\t");
+                        counter++;
+                    }
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine(counter);
+        }
+
+        static void Main()
+        {
+            sudoku map = new sudoku();
+            Console.WriteLine("Выберите уровень сложности \n1-легкий\n2-средний\n3-сложный");
+            int level = 1;
+            map.CreateRoom(level);
+        }
+    }
+}
