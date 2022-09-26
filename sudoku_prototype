@@ -1,16 +1,13 @@
-
+using System.Diagnostics.Metrics;
 using System.Globalization;
 
 namespace room
 {
-    public class sudoku
+    class sudoku
     {
-        const int n = 3;
-        public int level = 0;
-        public int[,] map = new int[n * n, n * n];
-        Random rnd = new Random();
+        const int n = 3;       
 
-        public void Room()
+        private int[,] Room(int[,] map)
         {
             for (int i = 0; i < n * n; i++)
             {
@@ -19,9 +16,10 @@ namespace room
                     map[i, j] = ((i * n + i / n + j) % (n * n) + 1);
                 }
             }
+            return (map);
         }
 
-        public void Transposition()
+        private int[,] Transposition(int[,] map)
         {
             int[,] Tmap = new int[n * n, n * n];
 
@@ -33,9 +31,10 @@ namespace room
                 }
             }
             map = Tmap;
+            return (map);
         }
 
-        public void Line()
+        private int[,] Line(int[,] map, Random rnd)
         {
             int Block = rnd.Next(0, n - 1);
             int LineOne = rnd.Next(0, n);
@@ -44,9 +43,10 @@ namespace room
             int Lt = Block * n + LineTwo;
             for (int j = 0; j < n * n; j++)
                 (map[Lo, j], map[Lt, j]) = (map[Lt, j], map[Lo, j]);
+            return (map);
         }
 
-        public void Column()
+        private int[,] Column(int[,] map, Random rnd)
         {
             int Block = rnd.Next(0, n - 1);
             int ColumnOne = rnd.Next(0, n);
@@ -55,12 +55,13 @@ namespace room
             int Ct = Block * n + ColumnTwo;
             for (int i = 0; i < n * n; i++)
                 (map[i, Co], map[i, Ct]) = (map[i, Co], map[i, Ct]);
+
+            return (map);
         }
 
-        public void Hide(int level)
+        private void Hide(int level, int[,] map, Random rnd )
         {
-
-            int chance= 0;
+            int chance = 0;
 
             if (level == 1)
             {
@@ -75,8 +76,6 @@ namespace room
                 level = 61;
             }
 
-            Random rnd = new Random();
-
             while (level != 0)
             {
                 int i = 0;
@@ -84,56 +83,59 @@ namespace room
 
                 for (i = 0; i < n * n; i++)
                 {
-
                     for (j = 0; j < n * n; j++)
                     {
                         chance = rnd.Next(0, 3);
-
-                        if (chance == 0 && map[i, j] != 0 && level>0)
+                        if (chance == 0 && map[i, j] != 0 && level > 0)
                         {
                             map[i, j] = 0;
                             level--;
                         }
-
                     }
                 }
 
-                if(level == 0)
+                if (level == 0)
                 {
                     break;
                 }
-                if(level >= 0)
+                if (level >= 0)
                 {
                     i = 0;
                     j = 0;
                 }
             }
-
-        
         }
 
-        public int LevelChoosing()
+        private int LevelChoosing()
         {
             Console.WriteLine("Введите число от 1 до 3 где\n1-легкий уровень\n2-средний уровень\n3-сложный уровень");
-            level = Console.Read();
-            level = level - 48;
+            int level = Convert.ToInt32(Console.ReadLine());
+
             return (level);
         }
 
-        public void CreateRoom(int level)
+        private void CreateRoom()
         {
-            Room();
-            int counter=0;
+            int[,] map = new int[n * n, n * n];
+            Random rnd = new Random();
+            Room(map);
+            
             int create = rnd.Next(n * n, n * n * n * n);
             for (int i = 0; i < create; i++)
             {
-                Transposition();
-                Line();
-                Column();
+                map = Transposition(map);
+                map = Line(map, rnd);
+                map = Column(map, rnd);
             }
 
-            Hide(level);
+            int level = LevelChoosing();
+            Hide(level, map, rnd);
+            Print(map);
+        }
 
+        private void Print(int[,] map)
+        {
+            int counter = 0;
             for (int i = 0; i < map.GetLength(0); i++)
             {
                 for (int j = 0; j < map.GetLength(1); j++)
@@ -141,7 +143,6 @@ namespace room
                     if (map[i, j] != 0)
                     {
                         Console.Write(map[i, j] + "\t");
-                        
                     }
                     else
                     {
@@ -156,8 +157,7 @@ namespace room
         static void Main()
         {
             sudoku map = new sudoku();
-            int level = map.LevelChoosing();
-            map.CreateRoom(level);
+            map.CreateRoom();
         }
     }
 }
