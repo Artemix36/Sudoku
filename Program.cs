@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Metrics;
+﻿using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Globalization;
 
 namespace Sudoku
@@ -8,7 +9,7 @@ namespace Sudoku
         int[,] state = new int[9, 9];
         public void SetState(int[,] newState)
         {
-            int[,] result =  new int[9, 9];
+            int[,] result = new int[9, 9];
             Array.Copy(newState, result, 81);
             state = result;
         }
@@ -20,7 +21,7 @@ namespace Sudoku
         int[,] Save = new int[9, 9];
         public void SetSave(int[,] newSave)
         {
-            int[,] result =  new int[9, 9];
+            int[,] result = new int[9, 9];
             Array.Copy(newSave, result, 81);
             Save = result;
         }
@@ -32,7 +33,7 @@ namespace Sudoku
         int[,] Winner = new int[9, 9];
         public void SetWinner(int[,] newWinner)
         {
-            int[,] result =  new int[9, 9];
+            int[,] result = new int[9, 9];
             Array.Copy(newWinner, result, 81);
             Winner = result;
         }
@@ -47,6 +48,19 @@ namespace Sudoku
         const int n = 3;
         private int level = 0;
         private bool is_active = false;
+        private Stopwatch stopwatch = Stopwatch.StartNew();
+        private string elapsedTime = "";
+        public void Timer_Start()
+        {
+            stopwatch.Start();
+        }
+        public string Timer_Stop()
+        {
+            stopwatch.Stop();
+            TimeSpan ts = stopwatch.Elapsed;
+            elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds,ts.Milliseconds / 10);
+            return elapsedTime;
+        }
 
         public int[,] Room()
         {
@@ -192,30 +206,25 @@ namespace Sudoku
             Hide(ref map, rnd);
             SetSave(map);
             base.SetState(map);
+            elapsedTime = "";
         }
         public void GetCell(int x, int y, int num)
         {
-            int [,] transferCell = getState();
+            int[,] transferCell = getState();
             transferCell[x - 1, y - 1] = num;
             SetState(transferCell);
         }
         public bool InputValidation(int x, int y)
         {
             int[,] validationcheck = getSave();
-            //int[,] validation = getState();
+            
             bool Validation;
             if (validationcheck[x - 1, y - 1] != 0)
             {
-                //if (validation[x - 1, y - 1] == 0)
-                //{
-                    //Validation = true;
-                    //return (Validation);
-                //}
-                //else
-                //{
-                    Validation = false;
-                    return (Validation);
-                //}
+                
+                Validation = false;
+                return (Validation);
+                
             }
             else
             {
@@ -226,14 +235,14 @@ namespace Sudoku
 
         public bool WinCheck()
         {
-          int[,] WinPretendent = getState();
-          int[,] WinVariant = getWinner();
-          bool wincheck = false;
-          foreach (int s1 in WinPretendent)
-            foreach (int s2 in WinVariant) if(s1==s2) wincheck = true;
-          return wincheck;
+            int[,] WinPretendent = getState();
+            int[,] WinVariant = getWinner();
+            bool wincheck = false;
+            foreach (int s1 in WinPretendent)
+                foreach (int s2 in WinVariant) if(s1==s2) wincheck = true;
+            return wincheck;   
         }
-        
+
         public int[,] DeveloperWin()
         {
             int[,] devel = getWinner();
@@ -275,6 +284,7 @@ namespace Sudoku
                             {
                                 base.CreateRoom();
                                 startMenuActive = false;
+                                Timer_Start();
                                 break;
                             }
                             if (input == 2)
@@ -318,11 +328,12 @@ namespace Sudoku
                             {
                                 if(WinCheck()){
                                     Console.WriteLine("Поздравляю, вы победили");
+                                    Timer_Stop();
                                     break;
                                 } else {
                                     Console.WriteLine("Решение неверное, проверьте заполнены ли все клетки, нет ли одинаковых значений в каждом ряду и колонке");
                                 }
-                                
+
                             }
                             if (input == 3)
                             {
@@ -331,11 +342,11 @@ namespace Sudoku
                             }
                             if (input == 4)
                             {
-                                
+
                                 base.DeveloperWin();
                                 Console.WriteLine("DEVELOPMENTMODE");
                                 int[,] a = base.getWinner();
-                                // Console.WriteLine(a);
+                                
                             }
                         }
                     }
@@ -378,9 +389,9 @@ namespace Sudoku
         }
         private void InputCell()
         {
-        int x_coord;
-        int y_coord;
-        int value;
+            int x_coord;
+            int y_coord;
+            int value;
             do
             {
                 try
@@ -405,7 +416,7 @@ namespace Sudoku
             while (true);
             do
             {
-                try
+                try 
                 {
                     Console.WriteLine("Введите столбец:");
                     int y = Convert.ToInt32(Console.ReadLine());

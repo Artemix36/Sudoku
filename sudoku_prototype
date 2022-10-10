@@ -237,17 +237,10 @@ namespace Sudoku
         {
             int[,] WinPretendent = getState();
             int[,] WinVariant = getWinner();
-            bool wincheck;
-            if (WinPretendent == WinVariant)
-            {
-                wincheck = true;
-                return wincheck;
-            }
-            else
-            {
-                wincheck = false;
-                return wincheck;
-            }
+            bool wincheck = false;
+            foreach (int s1 in WinPretendent)
+                foreach (int s2 in WinVariant) if(s1==s2) wincheck = true;
+            return wincheck;   
         }
 
         public int[,] DeveloperWin()
@@ -262,7 +255,6 @@ namespace Sudoku
     {
         private void StartMenu()
         {
-            Stopwatch stopwatch;
             bool startMenuActive = true;
             bool appActive = true;
             do
@@ -322,7 +314,7 @@ namespace Sudoku
                         Console.WriteLine("2. Завершить игру");
                         Console.WriteLine("3. В главное меню");
                         int input = Convert.ToInt32(Console.ReadLine());
-                        if (input < 1 || (input > 4)) //&& input != 4))
+                        if (input < 1 || (input > 4))
                         {
                             throw new Exception("Ошибка");
                         }
@@ -334,15 +326,12 @@ namespace Sudoku
                             }
                             if (input == 2)
                             {
-                                if (WinCheck())
-                                {
-                                    Console.WriteLine("GJ<MKCMSKI");
+                                if(WinCheck()){
+                                    Console.WriteLine("Поздравляю, вы победили");
                                     Timer_Stop();
                                     break;
-                                }
-                                else
-                                {
-                                    Console.WriteLine("ОШИБКА");
+                                } else {
+                                    Console.WriteLine("Решение неверное, проверьте заполнены ли все клетки, нет ли одинаковых значений в каждом ряду и колонке");
                                 }
 
                             }
