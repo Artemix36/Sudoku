@@ -341,7 +341,7 @@ namespace Sudoku
                             }
                             if (input == 3)
                             {
-                                Timer_Stop()
+                                Timer_Stop();
                                 startMenuActive = true;
                                 break;
                             }
