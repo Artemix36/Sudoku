@@ -5,14 +5,40 @@ namespace Sudoku
 {
     class SudokuState
     {
-        int[,] state = new int[9,9];
+        int[,] state = new int[9, 9];
         public void SetState(int[,] newState)
         {
-            state = newState;
+            int[,] result =  new int[9, 9];
+            Array.Copy(newState, result, 81);
+            state = result;
         }
         public int[,] getState()
         {
             return state;
+        }
+
+        int[,] Save = new int[9, 9];
+        public void SetSave(int[,] newSave)
+        {
+            int[,] result =  new int[9, 9];
+            Array.Copy(newSave, result, 81);
+            Save = result;
+        }
+        public int[,] getSave()
+        {
+            return Save;
+        }
+
+        int[,] Winner = new int[9, 9];
+        public void SetWinner(int[,] newWinner)
+        {
+            int[,] result =  new int[9, 9];
+            Array.Copy(newWinner, result, 81);
+            Winner = result;
+        }
+        public int[,] getWinner()
+        {
+            return Winner;
         }
     }
 
@@ -67,9 +93,9 @@ namespace Sudoku
             return (map);
         }
 
-        private void Hide(ref int[,] map, Random rnd )
+        private void Hide(ref int[,] map, Random rnd)
         {
-            int chance = 0, null_check=0, removed=0;
+            int chance = 0, null_check = 0, removed = 0;
 
             if (level == 0)
             {
@@ -147,14 +173,14 @@ namespace Sudoku
             is_active = true;
             int[,] map = Room();
             for (int i = 0; i < n * n; i++)
+            {
+                for (int j = 0; j < n * n; j++)
                 {
-                  for (int j = 0; j < n * n; j++)
-                 {
                     map[i, j] = ((i * n + i / n + j) % (n * n) + 1);
                 }
-                }
+            }
             Random rnd = new Random();
-            
+
             int create = rnd.Next(n * n * n * n, n * n * n * n * n * n * n * n);
             for (int i = 0; i < create; i++)
             {
@@ -162,13 +188,162 @@ namespace Sudoku
                 map = Line(map, rnd);
                 map = Column(map, rnd);
             }
+            SetWinner(map);
             Hide(ref map, rnd);
+            SetSave(map);
             base.SetState(map);
         }
+        public void GetCell(int x, int y, int num)
+        {
+            int [,] transferCell = getState();
+            transferCell[x - 1, y - 1] = num;
+            SetState(transferCell);
+        }
+        public bool InputValidation(int x, int y)
+        {
+            int[,] validationcheck = getSave();
+            //int[,] validation = getState();
+            bool Validation;
+            if (validationcheck[x - 1, y - 1] != 0)
+            {
+                //if (validation[x - 1, y - 1] == 0)
+                //{
+                    //Validation = true;
+                    //return (Validation);
+                //}
+                //else
+                //{
+                    Validation = false;
+                    return (Validation);
+                //}
+            }
+            else
+            {
+                Validation = true;
+                return (Validation);
+            }
+        }
+
+        /**public bool WinCheck()
+        {
+          int[,] WinPretendent = getState();
+          int[,] WinVariant = getWinner();
+          bool wincheck;
+          if (WinPretendent == WinVariant)
+            {
+                wincheck = true;
+                return wincheck;
+            }
+          else
+            {
+                wincheck = false;
+                return wincheck;
+            }
+        }**/
+        
+        //public int[,] DeveloperWin()
+        //{
+            //int[,] devel = getWinner();
+            //SetState(devel);
+            //return devel;
+        //}
     }
 
     class SudokuUi : SudokuMap
     {
+        private void StartMenu()
+        {
+            bool startMenuActive = true;
+            bool appActive = true;
+            do
+            {
+                do
+                {
+                    try
+                    {
+                        Console.WriteLine("----МЕНЮ----");
+                        if (base.GetIsActive()) Console.WriteLine("0. Продолжить игру");
+                        Console.WriteLine("1. Начать игру");
+                        Console.WriteLine("2. Режим сложности");
+                        Console.WriteLine("3. Выход");
+                        int input = Convert.ToInt32(Console.ReadLine());
+                        if (input < 0 || input > 3)
+                        {
+                            throw new Exception("Ошибка");
+                        }
+                        else
+                        {
+                            if (input == 0)
+                            {
+                                startMenuActive = false;
+                                break;
+                            }
+                            if (input == 1)
+                            {
+                                base.CreateRoom();
+                                startMenuActive = false;
+                                break;
+                            }
+                            if (input == 2)
+                            {
+                                ChangeDifficulty();
+                            }
+                            if (input == 3)
+                            {
+                                startMenuActive = false;
+                                appActive = false;
+                                break;
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Неверный формат ввода.");
+                    }
+                }
+                while (startMenuActive);
+                while (appActive)
+                {
+                    try
+                    {
+                        PrintSudoku();
+                        Console.WriteLine("1. Ввести число");
+                        Console.WriteLine("2. В главное меню");
+                        int input = Convert.ToInt32(Console.ReadLine());
+                        if (input < 1 || (input > 2)) //&& input != 4))
+                        {
+                            throw new Exception("Ошибка");
+                        }
+                        else
+                        {
+                            if (input == 1)
+                            {
+                                InputCell();
+                            }
+                            if (input == 2)
+                            {
+                                startMenuActive = true;
+                                break;
+                            }
+                            //if (input == 4)
+                            //{
+                                //var develop = new SudokuMap();
+                                //develop.DeveloperWin();
+                                //Console.WriteLine("DEVELOPMENTMODE");
+                               // var develop = new SudokuState();
+                                //int[,] a = develop.getWinner();
+                                //Console.WriteLine(a);
+                            //}
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Неверный формат ввода.");
+                    }
+                }
+            }
+            while (appActive);
+        }
         private void PrintSudoku()
         {
             int n = 9;
@@ -200,11 +375,14 @@ namespace Sudoku
         }
         private void InputCell()
         {
+        int x_coord;
+        int y_coord;
+        int value;
             do
             {
                 try
                 {
-                    Console.WriteLine("Введите координату по горизонтали:");
+                    Console.WriteLine("Введите строку:");
                     int x = Convert.ToInt32(Console.ReadLine());
                     if (x < 1 || x > 9)
                     {
@@ -212,6 +390,7 @@ namespace Sudoku
                     }
                     else
                     {
+                        x_coord = x;
                         break;
                     }
                 }
@@ -225,7 +404,7 @@ namespace Sudoku
             {
                 try
                 {
-                    Console.WriteLine("Введите координату по вертикали:");
+                    Console.WriteLine("Введите столбец:");
                     int y = Convert.ToInt32(Console.ReadLine());
                     if (y < 1 || y > 9)
                     {
@@ -233,6 +412,7 @@ namespace Sudoku
                     }
                     else
                     {
+                        y_coord = y;
                         break;
                     }
                 }
@@ -254,6 +434,7 @@ namespace Sudoku
                     }
                     else
                     {
+                        value = num;
                         break;
                     }
                 }
@@ -263,9 +444,25 @@ namespace Sudoku
                 }
             }
             while (true);
-
-
+            try
+            {
+                if (base.InputValidation(x_coord, y_coord))
+                {
+                    base.GetCell(x_coord, y_coord, value);
+                }
+                else
+                {
+                    throw new Exception("Ошибка");
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Вы ввели занятую ячейку\nНачните сначала");
+                InputCell();
+            }
         }
+
+
         private void ChangeDifficulty()
         {
             string[] difficultyArr = new string[3] { "Легкий", "Средниий", "Сложный" };
@@ -305,95 +502,7 @@ namespace Sudoku
         static void Main()
         {
             SudokuUi map = new SudokuUi();
-            bool startMenuActive = true;
-            bool appActive = true;
-            do
-            {
-                do
-                {
-                    try
-                    {
-                        Console.WriteLine("----МЕНЮ----");
-                        if ( map.GetIsActive() ) Console.WriteLine("0. Продолжить игру");
-                        Console.WriteLine("1. Начать игру");
-                        Console.WriteLine("2. Режим сложности");
-                        Console.WriteLine("3. Выход");
-                        int input = Convert.ToInt32(Console.ReadLine());
-                        if (input < 0 || input > 3)
-                        {
-                            throw new Exception("Ошибка");
-                        }
-                        else
-                        {
-                            if (input == 0)
-                            {
-                                startMenuActive = false;
-                                break;
-                            }
-                            if (input == 1)
-                            {
-                                map.CreateRoom();
-                                startMenuActive = false;
-                                break;
-                            }
-                            if (input == 2)
-                            {
-                                map.ChangeDifficulty();
-                            }
-                            if (input == 3)
-                            {
-                                startMenuActive = false;
-                                appActive = false;
-                                break;
-                            }
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine("Неверный формат ввода.");
-                    }
-                }
-                while (startMenuActive);
-                while (appActive)
-                {
-                    try
-                    {
-                        map.PrintSudoku();
-                        Console.WriteLine("1. Ввести число");
-                        Console.WriteLine("2. В главное меню");
-                        int input = Convert.ToInt32(Console.ReadLine());
-                        if (input < 1 || input > 2)
-                        {
-                            throw new Exception("Ошибка");
-                        }
-                        else
-                        {
-                            if (input == 1)
-                            {
-                                map.InputCell();
-                            }
-                            if (input == 2)
-                            {
-                                startMenuActive = true;
-                                break;
-                            }
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine("Неверный формат ввода.");
-                    }
-                }
-            }
-            while (appActive);
-
+            map.StartMenu();
         }
     }
 }
-
-// Метод/функция которая будет вводить данные в судоку, фронт будет отсылать массив вида:
-// {
-//  x: число
-//  y: число
-//  num: число для ввода
-// }
