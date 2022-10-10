@@ -237,9 +237,9 @@ namespace Sudoku
         {
             int[,] WinPretendent = getState();
             int[,] WinVariant = getWinner();
-            bool wincheck = false;
+            bool wincheck = true;
             foreach (int s1 in WinPretendent)
-                foreach (int s2 in WinVariant) if(s1==s2) wincheck = true;
+                foreach (int s2 in WinVariant) if(s1!=s2) wincheck = false;
             if(wincheck) is_active = false;
             return wincheck;   
         }
