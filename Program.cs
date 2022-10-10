@@ -240,6 +240,7 @@ namespace Sudoku
             bool wincheck = false;
             foreach (int s1 in WinPretendent)
                 foreach (int s2 in WinVariant) if(s1==s2) wincheck = true;
+            if(wincheck) is_active = false;
             return wincheck;   
         }
 
@@ -257,6 +258,7 @@ namespace Sudoku
         {
             bool startMenuActive = true;
             bool appActive = true;
+            bool youWinActive = false;
             do
             {
                 do
@@ -277,6 +279,7 @@ namespace Sudoku
                         {
                             if (input == 0)
                             {
+                                Timer_Start();
                                 startMenuActive = false;
                                 break;
                             }
@@ -328,7 +331,8 @@ namespace Sudoku
                             {
                                 if(WinCheck()){
                                     Console.WriteLine("Поздравляю, вы победили");
-                                    Timer_Stop();
+                                    Console.WriteLine("Ваше время: {0}", Timer_Stop());
+                                    youWinActive = true;
                                     break;
                                 } else {
                                     Console.WriteLine("Решение неверное, проверьте заполнены ли все клетки, нет ли одинаковых значений в каждом ряду и колонке");
@@ -337,6 +341,7 @@ namespace Sudoku
                             }
                             if (input == 3)
                             {
+                                Timer_Stop()
                                 startMenuActive = true;
                                 break;
                             }
@@ -347,6 +352,40 @@ namespace Sudoku
                                 Console.WriteLine("DEVELOPMENTMODE");
                                 int[,] a = base.getWinner();
                                 
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Неверный формат ввода.");
+                    }
+                }
+                while (youWinActive)
+                {
+                    try
+                    {
+                        Console.WriteLine("Желаете ли вы отправить данные и занять место в сипке лидеров?");
+                        Console.WriteLine("1. Да!");
+                        Console.WriteLine("2. Нет, спасибо");
+                        int input = Convert.ToInt32(Console.ReadLine());
+                        if (input < 1 || (input > 2))
+                        {
+                            throw new Exception("Ошибка");
+                        }
+                        else
+                        {
+                            if (input == 1)
+                            {        
+                                Console.WriteLine("Введите ваше имя");
+                                string name = Console.ReadLine();
+                                youWinActive = false;
+                                break;
+
+                            }
+                            if (input == 2)
+                            {
+                                youWinActive = false;
+                                break;
                             }
                         }
                     }
