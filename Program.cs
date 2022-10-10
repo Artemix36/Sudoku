@@ -51,7 +51,7 @@ namespace Sudoku
     class SudokuMap : SudokuState
     {
         const int n = 3;
-        private string path = @"C:\records.txt";
+        private string path = "./records.txt";
         private int level = 0;
         private bool is_active = false;
         private Stopwatch stopwatch = Stopwatch.StartNew();
@@ -81,7 +81,6 @@ namespace Sudoku
                 string line;
                 while ((line = sr.ReadLine()) != null)
                 {
-                    Console.WriteLine(line);
                     result.Add(line);
                 }
             }
@@ -317,6 +316,7 @@ namespace Sudoku
                             {
                                 Timer_Start();
                                 startMenuActive = false;
+                                Console.Clear();
                                 break;
                             }
                             if (input == 1)
@@ -324,18 +324,22 @@ namespace Sudoku
                                 base.CreateRoom();
                                 startMenuActive = false;
                                 Timer_Start();
+                                Console.Clear();
                                 break;
                             }
                             if (input == 2)
                             {
                                 ChangeDifficulty();
+                                Console.Clear();
                             }
                             if (input == 3)
                             {
+                                Console.Clear();
                                 foreach (string record in Record_Read())
                                 {
                                     Console.WriteLine(record);
                                 }
+                                Console.WriteLine();
                             }
                             if (input == 4)
                             {
@@ -347,7 +351,10 @@ namespace Sudoku
                     }
                     catch (Exception)
                     {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.Clear();
                         Console.WriteLine("Неверный формат ввода.");
+                        Console.ForegroundColor = ConsoleColor.Black; 
                     }
                 }
                 while (startMenuActive);
@@ -369,19 +376,26 @@ namespace Sudoku
                             if (input == 1)
                             {
                                 InputCell();
+                                Console.Clear();
                             }
                             if (input == 2)
                             {
                                 if (WinCheck())
                                 {
+                                    Console.Clear();
+                                    Console.ForegroundColor = ConsoleColor.Green;
                                     Console.WriteLine("Поздравляю, вы победили");
                                     Console.WriteLine("Ваше время: {0}", Timer_Stop());
+                                    Console.ForegroundColor = ConsoleColor.Black; 
                                     youWinActive = true;
                                     break;
                                 }
                                 else
                                 {
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    Console.Clear();
                                     Console.WriteLine("Решение неверное, проверьте заполнены ли все клетки, нет ли одинаковых значений в каждом ряду и колонке");
+                                    Console.ForegroundColor = ConsoleColor.Black; 
                                 }
 
                             }
@@ -389,11 +403,12 @@ namespace Sudoku
                             {
                                 Timer_Stop();
                                 startMenuActive = true;
+                                Console.Clear();
                                 break;
                             }
                             if (input == 4)
                             {
-
+                                Console.Clear();
                                 base.DeveloperWin();
                                 Console.WriteLine("DEVELOPMENTMODE");
                                 int[,] a = base.getWinner();
@@ -403,13 +418,15 @@ namespace Sudoku
                     }
                     catch (Exception)
                     {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.Clear();
                         Console.WriteLine("Неверный формат ввода.");
+                        Console.ForegroundColor = ConsoleColor.Black; 
                     }
                 }
                 while (youWinActive)
                 {
-                    try
-                    {
+                   
                         Console.WriteLine("Желаете ли вы отправить данные и занять место в сипке лидеров?");
                         Console.WriteLine("1. Да!");
                         Console.WriteLine("2. Нет, спасибо");
@@ -426,20 +443,21 @@ namespace Sudoku
                                 string name = Console.ReadLine();
                                 Record_Write(name);
                                 youWinActive = false;
+                                Console.Clear();
+                                startMenuActive = true;
                                 break;
 
                             }
                             if (input == 2)
                             {
+                                Console.Clear();
                                 youWinActive = false;
+                                startMenuActive = true;
                                 break;
                             }
                         }
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine("Неверный формат ввода.");
-                    }
+                    
+                    
                 }
             }
             while (appActive);
@@ -496,7 +514,9 @@ namespace Sudoku
                 }
                 catch (Exception)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Неверный формат ввода.");
+                    Console.ForegroundColor = ConsoleColor.Black; 
                 }
             }
             while (true);
@@ -518,7 +538,9 @@ namespace Sudoku
                 }
                 catch (Exception)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Неверный формат ввода.");
+                    Console.ForegroundColor = ConsoleColor.Black; 
                 }
             }
             while (true);
@@ -540,7 +562,9 @@ namespace Sudoku
                 }
                 catch (Exception)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Неверный формат ввода.");
+                    Console.ForegroundColor = ConsoleColor.Black; 
                 }
             }
             while (true);
@@ -557,8 +581,10 @@ namespace Sudoku
             }
             catch (Exception)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Вы ввели занятую ячейку\nНачните сначала");
                 InputCell();
+                Console.ForegroundColor = ConsoleColor.Black; 
             }
         }
 
@@ -593,7 +619,9 @@ namespace Sudoku
                 }
                 catch (Exception)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Неверный формат ввода.");
+                    Console.ForegroundColor = ConsoleColor.Black; 
                 }
             }
             while (true);
@@ -601,6 +629,9 @@ namespace Sudoku
 
         static void Main()
         {
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.Clear();
             SudokuUi map = new SudokuUi();
             map.StartMenu();
         }
