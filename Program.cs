@@ -224,7 +224,7 @@ namespace Sudoku
             }
         }
 
-        /**public bool WinCheck()
+        public bool WinCheck()
         {
           int[,] WinPretendent = getState();
           int[,] WinVariant = getWinner();
@@ -239,14 +239,14 @@ namespace Sudoku
                 wincheck = false;
                 return wincheck;
             }
-        }**/
+        }
         
-        //public int[,] DeveloperWin()
-        //{
-            //int[,] devel = getWinner();
-            //SetState(devel);
-            //return devel;
-        //}
+        public int[,] DeveloperWin()
+        {
+            int[,] devel = getWinner();
+            SetState(devel);
+            return devel;
+        }
     }
 
     class SudokuUi : SudokuMap
@@ -308,9 +308,10 @@ namespace Sudoku
                     {
                         PrintSudoku();
                         Console.WriteLine("1. Ввести число");
-                        Console.WriteLine("2. В главное меню");
+                        Console.WriteLine("2. Завершить игру");
+                        Console.WriteLine("3. В главное меню");
                         int input = Convert.ToInt32(Console.ReadLine());
-                        if (input < 1 || (input > 2)) //&& input != 4))
+                        if (input < 1 || (input > 4)) //&& input != 4))
                         {
                             throw new Exception("Ошибка");
                         }
@@ -322,18 +323,27 @@ namespace Sudoku
                             }
                             if (input == 2)
                             {
+                                if(WinCheck()){
+                                    Console.WriteLine("GJ<MKCMSKI");
+                                    break;
+                                } else {
+                                    Console.WriteLine("ОШИБКА");
+                                }
+                                
+                            }
+                            if (input == 3)
+                            {
                                 startMenuActive = true;
                                 break;
                             }
-                            //if (input == 4)
-                            //{
-                                //var develop = new SudokuMap();
-                                //develop.DeveloperWin();
-                                //Console.WriteLine("DEVELOPMENTMODE");
-                               // var develop = new SudokuState();
-                                //int[,] a = develop.getWinner();
-                                //Console.WriteLine(a);
-                            //}
+                            if (input == 4)
+                            {
+                                
+                                base.DeveloperWin();
+                                Console.WriteLine("DEVELOPMENTMODE");
+                                int[,] a = base.getWinner();
+                                // Console.WriteLine(a);
+                            }
                         }
                     }
                     catch (Exception)
