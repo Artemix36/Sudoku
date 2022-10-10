@@ -304,7 +304,7 @@ namespace Sudoku
                         Console.WriteLine("2. Завершить игру");
                         Console.WriteLine("3. В главное меню");
                         int input = Convert.ToInt32(Console.ReadLine());
-                        if (input < 1 || (input > 4)) //&& input != 4))
+                        if (input < 1 || (input > 4))
                         {
                             throw new Exception("Ошибка");
                         }
@@ -317,10 +317,10 @@ namespace Sudoku
                             if (input == 2)
                             {
                                 if(WinCheck()){
-                                    Console.WriteLine("GJ<MKCMSKI");
+                                    Console.WriteLine("Поздравляю, вы победили");
                                     break;
                                 } else {
-                                    Console.WriteLine("ОШИБКА");
+                                    Console.WriteLine("Решение неверное, проверьте заполнены ли все клетки, нет ли одинаковых значений в каждом ряду и колонке");
                                 }
                                 
                             }
