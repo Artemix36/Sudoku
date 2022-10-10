@@ -1,6 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Globalization;
+using static System.Net.Mime.MediaTypeNames;
+using System.Text;
+using System.IO;
+using System;
+using System.Collections.Generic;
 
 namespace Sudoku
 {
@@ -46,6 +51,7 @@ namespace Sudoku
     class SudokuMap : SudokuState
     {
         const int n = 3;
+        private string path = @"C:\records.txt";
         private int level = 0;
         private bool is_active = false;
         private Stopwatch stopwatch = Stopwatch.StartNew();
@@ -58,10 +64,29 @@ namespace Sudoku
         {
             stopwatch.Stop();
             TimeSpan ts = stopwatch.Elapsed;
-            elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds,ts.Milliseconds / 10);
+            elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
             return elapsedTime;
         }
-
+        public void Record_Write(string name)
+        {
+            StreamWriter SW = new StreamWriter(path, true, System.Text.Encoding.Default);
+            SW.WriteLine(name + " " + elapsedTime);
+            SW.Close();
+        }
+        public List<string> Record_Read()
+        {
+            List<string> result = new List<string> ();
+            using (StreamReader sr = new StreamReader(path))
+            {
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    Console.WriteLine(line);
+                    result.Add(line);
+                }
+            }
+            return result;
+        }
         public int[,] Room()
         {
             return base.getState();
@@ -218,14 +243,14 @@ namespace Sudoku
         public bool InputValidation(int x, int y)
         {
             int[,] validationcheck = getSave();
-            
+
             bool Validation;
             if (validationcheck[x - 1, y - 1] != 0)
             {
-                
+
                 Validation = false;
                 return (Validation);
-                
+
             }
             else
             {
@@ -239,19 +264,19 @@ namespace Sudoku
             int[,] WinPretendent = getState();
             int[,] WinVariant = getWinner();
             bool wincheck = true;
-			for (int i = 0; i < WinPretendent.GetLength(0); i++)
-			{
-				for (int j = 0; j < WinPretendent.GetLength(1); j++)
-				{
-					if (WinPretendent[i, j] != WinVariant[i, j])
-					{
-						wincheck = false;
-						break;
-					}
-				}
-			}   
-            if(wincheck) is_active = false;
-            return wincheck;   
+            for (int i = 0; i < WinPretendent.GetLength(0); i++)
+            {
+                for (int j = 0; j < WinPretendent.GetLength(1); j++)
+                {
+                    if (WinPretendent[i, j] != WinVariant[i, j])
+                    {
+                        wincheck = false;
+                        break;
+                    }
+                }
+            }
+            if (wincheck) is_active = false;
+            return wincheck;
         }
 
         public int[,] DeveloperWin()
@@ -279,9 +304,10 @@ namespace Sudoku
                         if (base.GetIsActive()) Console.WriteLine("0. Продолжить игру");
                         Console.WriteLine("1. Начать игру");
                         Console.WriteLine("2. Режим сложности");
-                        Console.WriteLine("3. Выход");
+                        Console.WriteLine("3. Список лидеров");
+                        Console.WriteLine("4. Выход");
                         int input = Convert.ToInt32(Console.ReadLine());
-                        if (input < 0 || input > 3)
+                        if (input < 0 || input > 4)
                         {
                             throw new Exception("Ошибка");
                         }
@@ -305,6 +331,13 @@ namespace Sudoku
                                 ChangeDifficulty();
                             }
                             if (input == 3)
+                            {
+                                foreach (string record in Record_Read())
+                                {
+                                    Console.WriteLine(record);
+                                }
+                            }
+                            if (input == 4)
                             {
                                 startMenuActive = false;
                                 appActive = false;
@@ -339,12 +372,15 @@ namespace Sudoku
                             }
                             if (input == 2)
                             {
-                                if(WinCheck()){
+                                if (WinCheck())
+                                {
                                     Console.WriteLine("Поздравляю, вы победили");
                                     Console.WriteLine("Ваше время: {0}", Timer_Stop());
                                     youWinActive = true;
                                     break;
-                                } else {
+                                }
+                                else
+                                {
                                     Console.WriteLine("Решение неверное, проверьте заполнены ли все клетки, нет ли одинаковых значений в каждом ряду и колонке");
                                 }
 
@@ -361,7 +397,7 @@ namespace Sudoku
                                 base.DeveloperWin();
                                 Console.WriteLine("DEVELOPMENTMODE");
                                 int[,] a = base.getWinner();
-                                
+
                             }
                         }
                     }
@@ -385,9 +421,10 @@ namespace Sudoku
                         else
                         {
                             if (input == 1)
-                            {        
+                            {
                                 Console.WriteLine("Введите ваше имя");
                                 string name = Console.ReadLine();
+                                Record_Write(name);
                                 youWinActive = false;
                                 break;
 
@@ -465,7 +502,7 @@ namespace Sudoku
             while (true);
             do
             {
-                try 
+                try
                 {
                     Console.WriteLine("Введите столбец:");
                     int y = Convert.ToInt32(Console.ReadLine());
