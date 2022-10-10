@@ -184,6 +184,7 @@ namespace Sudoku
 
         public void CreateRoom()
         {
+            stopwatch = Stopwatch.StartNew();
             is_active = true;
             int[,] map = Room();
             for (int i = 0; i < n * n; i++)
@@ -238,8 +239,17 @@ namespace Sudoku
             int[,] WinPretendent = getState();
             int[,] WinVariant = getWinner();
             bool wincheck = true;
-            foreach (int s1 in WinPretendent)
-                foreach (int s2 in WinVariant) if(s1!=s2) wincheck = false;
+			for (int i = 0; i < WinPretendent.GetLength(0); i++)
+			{
+				for (int j = 0; j < WinPretendent.GetLength(1); j++)
+				{
+					if (WinPretendent[i, j] != WinVariant[i, j])
+					{
+						wincheck = false;
+						break;
+					}
+				}
+			}   
             if(wincheck) is_active = false;
             return wincheck;   
         }
