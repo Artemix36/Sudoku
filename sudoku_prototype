@@ -1,22 +1,50 @@
 using System.Diagnostics.Metrics;
 using System.Globalization;
 
-namespace room
+namespace Sudoku
 {
-    class sudoku
+    class SudokuState
     {
-        const int n = 3;       
-
-        private int[,] Room(int[,] map)
+        int[,] state = new int[9, 9];
+        public void SetState(int[,] newState)
         {
-            for (int i = 0; i < n * n; i++)
-            {
-                for (int j = 0; j < n * n; j++)
-                {
-                    map[i, j] = ((i * n + i / n + j) % (n * n) + 1);
-                }
-            }
-            return (map);
+            state = newState;
+        }
+        public int[,] getState()
+        {
+            return state;
+        }
+
+        int[,] Save = new int[9, 9];
+        public void SetSave(int[,] newSave)
+        {
+            Save = newSave;
+        }
+        public int[,] getSave()
+        {
+            return Save;
+        }
+
+        int[,] Winner = new int[9, 9];
+        public void SetWinner(int[,] newWinner)
+        {
+            Winner = newWinner;
+        }
+        public int[,] getWinner()
+        {
+            return Winner;
+        }
+    }
+
+    class SudokuMap : SudokuState
+    {
+        const int n = 3;
+        private int level = 0;
+        private bool is_active = false;
+
+        public int[,] Room()
+        {
+            return base.getState();
         }
 
         private int[,] Transposition(int[,] map)
@@ -59,105 +87,414 @@ namespace room
             return (map);
         }
 
-        private void Hide(int level, int[,] map, Random rnd )
+        private void Hide(ref int[,] map, Random rnd)
         {
-            int chance = 0;
+            int chance = 0, null_check = 0, removed = 0;
 
+            if (level == 0)
+            {
+                removed = 40;
+            }
             if (level == 1)
             {
-                level = 40;
+                removed = 54;
             }
             if (level == 2)
             {
-                level = 54;
-            }
-            if (level == 3)
-            {
-                level = 61;
+                removed = 61;
             }
 
-            while (level != 0)
+            while (removed != 0)
             {
-                int i = 0;
-                int j = 0;
-
-                for (i = 0; i < n * n; i++)
+                for (int i = 0; i < n * n; i++)
                 {
-                    for (j = 0; j < n * n; j++)
+                    for (int j = 0; j < n * n; j++)
                     {
                         chance = rnd.Next(0, 3);
-                        if (chance == 0 && map[i, j] != 0 && level > 0)
+                        if (chance == 0 && map[i, j] != 0 && removed > 0)
                         {
-                            map[i, j] = 0;
-                            level--;
+                            null_check = Null_Check(map, i, j);
+                            if (null_check == 0)
+                            {
+                                map[i, j] = 0;
+                                removed--;
+                            }
+
                         }
                     }
                 }
-
-                if (level == 0)
-                {
-                    break;
-                }
-                if (level >= 0)
-                {
-                    i = 0;
-                    j = 0;
-                }
             }
         }
 
-        private int LevelChoosing()
+        private int Null_Check(int[,] map, int i, int j)
         {
-            Console.WriteLine("Введите число от 1 до 3 где\n1-легкий уровень\n2-средний уровень\n3-сложный уровень");
-            int level = Convert.ToInt32(Console.ReadLine());
-
-            return (level);
+            int line = 0, column = 0;
+            for (int k = 0; k < n * n; k++)
+            {
+                if (map[i, k] == 0)
+                {
+                    line++;
+                }
+                if (map[k, j] == 0)
+                {
+                    column++;
+                }
+            }
+            if (line == n * n - 1)
+                return line;
+            else if (column == n * n - 1)
+                return column;
+            else return 0;
         }
 
-        private void CreateRoom()
+        public void LevelChoosing(int new_level)
         {
-            int[,] map = new int[n * n, n * n];
+            level = new_level;
+            is_active = false;
+
+        }
+        public int GetLevel()
+        {
+            return level;
+        }
+        public bool GetIsActive()
+        {
+            return is_active;
+        }
+
+        public void CreateRoom()
+        {
+            is_active = true;
+            int[,] map = Room();
+            for (int i = 0; i < n * n; i++)
+            {
+                for (int j = 0; j < n * n; j++)
+                {
+                    map[i, j] = ((i * n + i / n + j) % (n * n) + 1);
+                }
+            }
             Random rnd = new Random();
-            Room(map);
-            
-            int create = rnd.Next(n * n, n * n * n * n);
+
+            int create = rnd.Next(n * n * n * n, n * n * n * n * n * n * n * n);
             for (int i = 0; i < create; i++)
             {
                 map = Transposition(map);
                 map = Line(map, rnd);
                 map = Column(map, rnd);
             }
-
-            int level = LevelChoosing();
-            Hide(level, map, rnd);
-            Print(map);
+            SetWinner(map);
+            Hide(ref map, rnd);
+            SetSave(map);
+            base.SetState(map);
+        }
+        public void GetCell(int x, int y, int num)
+        {
+            int [,] transferCell = getState();
+            transferCell[x - 1, y - 1] = num;
+            SetState(transferCell);
+        }
+        public bool InputValidation(int x, int y)
+        {
+            int[,] validationcheck = getSave();
+            //int[,] validation = getState();
+            bool Validation;
+            if (validationcheck[x - 1, y - 1] != 0)
+            {
+                //if (validation[x - 1, y - 1] == 0)
+                //{
+                    //Validation = true;
+                    //return (Validation);
+                //}
+                //else
+                //{
+                    Validation = false;
+                    return (Validation);
+                //}
+            }
+            else
+            {
+                Validation = true;
+                return (Validation);
+            }
         }
 
-        private void Print(int[,] map)
+        /**public bool WinCheck()
         {
-            int counter = 0;
-            for (int i = 0; i < map.GetLength(0); i++)
+          int[,] WinPretendent = getState();
+          int[,] WinVariant = getWinner();
+          bool wincheck;
+          if (WinPretendent == WinVariant)
             {
-                for (int j = 0; j < map.GetLength(1); j++)
+                wincheck = true;
+                return wincheck;
+            }
+          else
+            {
+                wincheck = false;
+                return wincheck;
+            }
+        }**/
+        
+        //public int[,] DeveloperWin()
+        //{
+            //int[,] devel = getWinner();
+            //SetState(devel);
+            //return devel;
+        //}
+    }
+
+    class SudokuUi : SudokuMap
+    {
+        private void PrintSudoku()
+        {
+            int n = 9;
+            int[,] mas = base.Room();
+            Console.Write(String.Format("{0,3}", '|'));
+            for (int j = 1; j <= n; j++)
+                Console.Write(String.Format("{0,2}", j));
+            Console.WriteLine();
+            Console.Write(String.Format("   {0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}", '-'));
+            Console.WriteLine();
+            for (int i = 0; i < n; i++)
+            {
+                Console.Write(String.Format("{0,0}{1,0} ", i + 1, '}'));
+                for (int j = 0; j < n; j++)
                 {
-                    if (map[i, j] != 0)
+                    if (j != n - 1)
                     {
-                        Console.Write(map[i, j] + "\t");
+                        Console.Write(String.Format("{0,1}{1,1}", '|', mas[i, j] == 0 ? ' ' : mas[i, j].ToString()));
                     }
                     else
                     {
-                        Console.Write("| |" + "\t");
-                        counter++;
+                        Console.Write(String.Format("{0,1}{1,1}{2,1}", '|', mas[i, j] == 0 ? ' ' : mas[i, j].ToString(), '|'));
                     }
                 }
                 Console.WriteLine();
             }
+            Console.Write(String.Format("   {0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}", '-'));
+            Console.WriteLine();
+        }
+        private void InputCell()
+        {
+        int first;
+        int second;
+        int third;
+            do
+            {
+                try
+                {
+                    Console.WriteLine("Введите строку:");
+                    int x = Convert.ToInt32(Console.ReadLine());
+                    if (x < 1 || x > 9)
+                    {
+                        throw new Exception("Ошибка");
+                    }
+                    else
+                    {
+                        first = x;
+                        break;
+                    }
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Неверный формат ввода.");
+                }
+            }
+            while (true);
+            do
+            {
+                try
+                {
+                    Console.WriteLine("Введите столбец:");
+                    int y = Convert.ToInt32(Console.ReadLine());
+                    if (y < 1 || y > 9)
+                    {
+                        throw new Exception("Ошибка");
+                    }
+                    else
+                    {
+                        second = y;
+                        break;
+                    }
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Неверный формат ввода.");
+                }
+            }
+            while (true);
+            do
+            {
+                try
+                {
+                    Console.WriteLine("Введите число для выбранной клетки:");
+                    int num = Convert.ToInt32(Console.ReadLine());
+                    if (num < 1 || num > 9)
+                    {
+                        throw new Exception("Ошибка");
+                    }
+                    else
+                    {
+                        third = num;
+                        break;
+                    }
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Неверный формат ввода.");
+                }
+            }
+            while (true);
+            bool a = InputValidation(first, second);
+            try
+            {
+                if (a == true)
+                {
+                    GetCell(first, second, third);
+                }
+                else
+                {
+                    throw new Exception("Ошибка");
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Вы ввели занятую ячейку\nНачните сначала");
+                InputCell();
+            }
+        }
+
+
+        private void ChangeDifficulty()
+        {
+            string[] difficultyArr = new string[3] { "Легкий", "Средниий", "Сложный" };
+            int activeDifficulty = base.GetLevel();
+            Console.WriteLine(String.Format("Текущий уровень сложности: {0,0}", difficultyArr[activeDifficulty]));
+            do
+            {
+                try
+                {
+                    Console.WriteLine("Выберите уровень сложности:");
+                    Console.WriteLine("1. Легкий");
+                    Console.WriteLine("2. Средний");
+                    Console.WriteLine("3. Сложный");
+                    int x = Convert.ToInt32(Console.ReadLine());
+                    if (x < 1 || x > 3)
+                    {
+                        throw new Exception("Ошибка");
+                    }
+                    else
+                    {
+                        if (activeDifficulty != x - 1)
+                        {
+                            base.LevelChoosing(x - 1);
+                        }
+                        Console.WriteLine("Сохранено!");
+                        break;
+                    }
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Неверный формат ввода.");
+                }
+            }
+            while (true);
         }
 
         static void Main()
         {
-            sudoku map = new sudoku();
-            map.CreateRoom();
+            SudokuUi map = new SudokuUi();
+            bool startMenuActive = true;
+            bool appActive = true;
+            do
+            {
+                do
+                {
+                    try
+                    {
+                        Console.WriteLine("----МЕНЮ----");
+                        if (map.GetIsActive()) Console.WriteLine("0. Продолжить игру");
+                        Console.WriteLine("1. Начать игру");
+                        Console.WriteLine("2. Режим сложности");
+                        Console.WriteLine("3. Выход");
+                        int input = Convert.ToInt32(Console.ReadLine());
+                        if (input < 0 || input > 3)
+                        {
+                            throw new Exception("Ошибка");
+                        }
+                        else
+                        {
+                            if (input == 0)
+                            {
+                                startMenuActive = false;
+                                break;
+                            }
+                            if (input == 1)
+                            {
+                                map.CreateRoom();
+                                startMenuActive = false;
+                                break;
+                            }
+                            if (input == 2)
+                            {
+                                map.ChangeDifficulty();
+                            }
+                            if (input == 3)
+                            {
+                                startMenuActive = false;
+                                appActive = false;
+                                break;
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Неверный формат ввода.");
+                    }
+                }
+                while (startMenuActive);
+                while (appActive)
+                {
+                    try
+                    {
+                        map.PrintSudoku();
+                        Console.WriteLine("1. Ввести число");
+                        Console.WriteLine("2. В главное меню");
+                        int input = Convert.ToInt32(Console.ReadLine());
+                        if (input < 1 || (input > 2)) //&& input != 4))
+                        {
+                            throw new Exception("Ошибка");
+                        }
+                        else
+                        {
+                            if (input == 1)
+                            {
+                                map.InputCell();
+                            }
+                            if (input == 2)
+                            {
+                                startMenuActive = true;
+                                break;
+                            }
+                            //if (input == 4)
+                            //{
+                                //var develop = new SudokuMap();
+                                //develop.DeveloperWin();
+                                //Console.WriteLine("DEVELOPMENTMODE");
+                               // var develop = new SudokuState();
+                                //int[,] a = develop.getWinner();
+                                //Console.WriteLine(a);
+                            //}
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Неверный формат ввода.");
+                    }
+                }
+            }
+            while (appActive);
+
         }
     }
 }
