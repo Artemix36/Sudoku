@@ -228,17 +228,10 @@ namespace Sudoku
         {
           int[,] WinPretendent = getState();
           int[,] WinVariant = getWinner();
-          bool wincheck;
-          if (WinPretendent == WinVariant)
-            {
-                wincheck = true;
-                return wincheck;
-            }
-          else
-            {
-                wincheck = false;
-                return wincheck;
-            }
+          bool wincheck = false;
+          foreach (int s1 in WinPretendent)
+            foreach (int s2 in WinVariant) if(s1==s2) wincheck = true;
+          return wincheck;
         }
         
         public int[,] DeveloperWin()
