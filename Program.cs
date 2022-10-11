@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Globalization;
 using static System.Net.Mime.MediaTypeNames;
@@ -302,92 +302,90 @@ namespace Sudoku
         }
         protected int ErrorCheck()
         {
-            int error=0;
+            int error = 0;
             int[,] map = GetState();
             for (int X = 0; X < n * n; X++)
             {
                 for (int Y = 0; Y < n * n; Y++)
                 {
-                    for (int j = 0; j < n * n; j++)
+                    if (map[X, Y] != 0)
                     {
-                        if ((map[X, j] == map[X, Y]) & (j!=Y) &(map[X, Y] > 0))
+                        for (int j = 0; j < n * n; j++)
                         {
-                            error = 1;
-                            break;
+                            if ((map[X, j] == map[X, Y]) && (j != Y))
+                            {
+                                error = 1;
+                                break;
+                            }
                         }
-                    }
-                    for (int i = 0; i < n * n; i++)
-                    {
-                        if ((map[i, Y] == map[X, Y]) & (i != X) & (map[X, Y] > 0))
+                        for (int i = 0; i < n * n; i++)
                         {
-                            error = 2;
-                            break;
+                            if ((map[i, Y] == map[X, Y]) && (i != X))
+                            {
+                                error = 2;
+                                break;
+                            }
                         }
-                    }
-                    if (X >= 0 & X <= 2 & error==0)
-                    {
-                        error = ErroeCheckSqere(X, Y);
-                    }
-                    if (X >= 3 & X <= 5 & error == 0)
-                    {
-                        error = ErroeCheckSqere(X, Y);
-                    }
-                    if (X >= 6 & X <= 8 & error == 0)
-                    {
-                        error = ErroeCheckSqere(X, Y);
+                        if (X >= 0 && X < n)
+                        {
+                            error = ErroeCheckSqere(X, Y, error);
+                        }
+                        if (X >= n && X < n * 2)
+                        {
+                            error = ErroeCheckSqere(X, Y, error);
+                        }
+                        if (X >= n * 2 && X < n * 3)
+                        {
+                            error = ErroeCheckSqere(X, Y, error);
+                        }
                     }
                 }
             }
             return error;
-
         }
-        private int ErroeCheckSqere(int X, int Y)
+        private int ErroeCheckSqere(int X, int Y, int error)
         {
-            int error = 0;
             int[,] map = GetState();
-            if (Y >= 0 && Y <= 2)
+            if (Y >= 0 && Y < n)
             {
                 for (int i = 0; i < n; i++)
                 {
                     for (int j = 0; j < n; j++)
                     {
-                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y) & (map[X, Y] > 0))
+                        if ((map[i, j] == map[X, Y]) && (i != X) && (j != Y))
                         {
                             error = 3;
                             break;
                         }
                     }
-                    i = i + 6;
                 }
             }
-            if (Y >= 3 && Y <= 5)
+            if (Y >= n && Y < n * 2)
             {
                 for (int i = n; i < n * 2; i++)
                 {
                     for (int j = n; j < n * 2; j++)
                     {
-                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y) & (map[X, Y] > 0))
+                        if ((map[i, j] == map[X, Y]) && (i != X) && (j != Y))
                         {
                             error = 3;
                             break;
                         }
                     }
-                    i = i + 6;
                 }
             }
-            if (Y >= 6 && Y <= 8)
+            if (Y >= n * 2 && Y < n * n)
             {
                 for (int i = n * 2; i < n * 3; i++)
                 {
                     for (int j = n * 2; j < n * 3; j++)
                     {
-                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y) & (map[X, Y] > 0))
+                        if ((map[i, j] == map[X, Y]) && (i != X) && (j != Y))
                         {
                             error = 3;
                             break;
                         }
                     }
-                    i = i + 6;
                 }
             }
             return error;
@@ -601,7 +599,7 @@ namespace Sudoku
             Console.Write(String.Format("   {0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}", '-'));
             Console.WriteLine();
             Error error = (Error)ErrorCheck();
-            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.ForegroundColor = ConsoleColor.Blue;
             switch (error)
             {
                 case Error.no_key:
