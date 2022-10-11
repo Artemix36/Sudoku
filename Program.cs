@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Globalization;
 using static System.Net.Mime.MediaTypeNames;
@@ -647,8 +647,9 @@ namespace Sudoku
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Вы ввели занятую ячейку\nНачните сначала");
-                InputCell();
                 Console.ForegroundColor = ConsoleColor.Black;
+                InputCell();
+                
             }
         }
         // метод смены уровня сложности
