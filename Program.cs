@@ -300,27 +300,29 @@ namespace Sudoku
                 {
                     for (int j = 0; j < n * n; j++)
                     {
-                        if ((map[X, j] == map[X, Y]) & (j!=Y))
+                        if ((map[X, j] == map[X, Y]) & (j!=Y) &(map[X, Y] > 0))
                         {
                             error = 1;
+                            break;
                         }
                     }
                     for (int i = 0; i < n * n; i++)
                     {
-                        if ((map[i, Y] == map[X, Y]) & (i != X))
+                        if ((map[i, Y] == map[X, Y]) & (i != X) & (map[X, Y] > 0))
                         {
                             error = 2;
+                            break;
                         }
                     }
-                    if (X >= 0 && X <= 2)
+                    if (X >= 0 & X <= 2 & error==0)
                     {
                         error = ErroeCheckSqere(X, Y);
                     }
-                    if (X >= 3 && X <= 5)
+                    if (X >= 3 & X <= 5 & error == 0)
                     {
                         error = ErroeCheckSqere(X, Y);
                     }
-                    if (X >= 6 && X <= 8)
+                    if (X >= 6 & X <= 8 & error == 0)
                     {
                         error = ErroeCheckSqere(X, Y);
                     }
@@ -339,10 +341,10 @@ namespace Sudoku
                 {
                     for (int j = 0; j < n; j++)
                     {
-                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y))
+                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y) & (map[X, Y] > 0))
                         {
                             error = 3;
-                            return error;
+                            break;
                         }
                     }
                     i = i + 6;
@@ -354,10 +356,10 @@ namespace Sudoku
                 {
                     for (int j = n; j < n * 2; j++)
                     {
-                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y))
+                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y) & (map[X, Y] > 0))
                         {
                             error = 3;
-                            return error;
+                            break;
                         }
                     }
                     i = i + 6;
@@ -369,10 +371,10 @@ namespace Sudoku
                 {
                     for (int j = n * 2; j < n * 3; j++)
                     {
-                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y))
+                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y) & (map[X, Y] > 0))
                         {
                             error = 3;
-                            return error;
+                            break;
                         }
                     }
                     i = i + 6;
@@ -566,7 +568,7 @@ namespace Sudoku
             for (int j = 1; j <= n; j++)
                 Console.Write(String.Format("{0,2}", j));
             Console.WriteLine();
-            Console.Write("   -------------------");
+            Console.Write(String.Format("   {0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}", '-'));
             Console.WriteLine();
             for (int i = 0; i < n; i++)
             {
@@ -584,7 +586,7 @@ namespace Sudoku
                 }
                 Console.WriteLine();
             }
-            Console.Write("   -------------------");
+            Console.Write(String.Format("   {0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}", '-'));
             Console.WriteLine();
             Error error = (Error)ErrorCheck();
             switch (error)
