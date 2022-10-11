@@ -12,37 +12,37 @@ namespace Sudoku
     class SudokuState
     {
         int[,] state = new int[9, 9];
-        public void SetState(int[,] newState)
+        protected void SetState(int[,] newState)
         {
             int[,] result = new int[9, 9];
             Array.Copy(newState, result, 81);
             state = result;
         }
-        public int[,] getState()
+        protected int[,] getState()
         {
             return state;
         }
 
         int[,] Save = new int[9, 9];
-        public void SetSave(int[,] newSave)
+        protected void SetSave(int[,] newSave)
         {
             int[,] result = new int[9, 9];
             Array.Copy(newSave, result, 81);
             Save = result;
         }
-        public int[,] getSave()
+        protected int[,] getSave()
         {
             return Save;
         }
 
         int[,] Winner = new int[9, 9];
-        public void SetWinner(int[,] newWinner)
+        protected void SetWinner(int[,] newWinner)
         {
             int[,] result = new int[9, 9];
             Array.Copy(newWinner, result, 81);
             Winner = result;
         }
-        public int[,] getWinner()
+        protected int[,] getWinner()
         {
             return Winner;
         }
@@ -56,26 +56,26 @@ namespace Sudoku
         private bool is_active = false;
         private Stopwatch stopwatch = Stopwatch.StartNew();
         private string elapsedTime = "";
-        public void Timer_Start()
+        protected void Timer_Start()
         {
             stopwatch.Start();
         }
-        public string Timer_Stop()
+        protected string Timer_Stop()
         {
             stopwatch.Stop();
             TimeSpan ts = stopwatch.Elapsed;
             elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
             return elapsedTime;
         }
-        public void Record_Write(string name)
+        protected void Record_Write(string name)
         {
             StreamWriter SW = new StreamWriter(path, true, System.Text.Encoding.Default);
             SW.WriteLine(name + " " + elapsedTime);
             SW.Close();
         }
-        public List<string> Record_Read()
+        protected List<string> Record_Read()
         {
-            List<string> result = new List<string> ();
+            List<string> result = new List<string>();
             using (StreamReader sr = new StreamReader(path))
             {
                 string line;
@@ -86,7 +86,7 @@ namespace Sudoku
             }
             return result;
         }
-        public int[,] Room()
+        protected int[,] Room()
         {
             return base.getState();
         }
@@ -191,22 +191,22 @@ namespace Sudoku
             else return 0;
         }
 
-        public void LevelChoosing(int new_level)
+        protected void LevelChoosing(int new_level)
         {
             level = new_level;
             is_active = false;
 
         }
-        public int GetLevel()
+        protected int GetLevel()
         {
             return level;
         }
-        public bool GetIsActive()
+        protected bool GetIsActive()
         {
             return is_active;
         }
 
-        public void CreateRoom()
+        protected void CreateRoom()
         {
             stopwatch = Stopwatch.StartNew();
             is_active = true;
@@ -233,13 +233,13 @@ namespace Sudoku
             base.SetState(map);
             elapsedTime = "";
         }
-        public void GetCell(int x, int y, int num)
+        protected void GetCell(int x, int y, int num)
         {
             int[,] transferCell = getState();
             transferCell[x - 1, y - 1] = num;
             SetState(transferCell);
         }
-        public bool InputValidation(int x, int y)
+        protected bool InputValidation(int x, int y)
         {
             int[,] validationcheck = getSave();
 
@@ -258,7 +258,7 @@ namespace Sudoku
             }
         }
 
-        public bool WinCheck()
+        protected bool WinCheck()
         {
             int[,] WinPretendent = getState();
             int[,] WinVariant = getWinner();
@@ -277,12 +277,191 @@ namespace Sudoku
             if (wincheck) is_active = false;
             return wincheck;
         }
-
-        public int[,] DeveloperWin()
+        protected int[,] DeveloperWin()
         {
             int[,] devel = getWinner();
             SetState(devel);
             return devel;
+        }
+        protected enum Error
+        {
+            NO,
+            One,
+            Two,
+            Three,
+        }
+        protected int ErrorCheck()
+        {
+            int error=0;
+            for (int X = 0; X < n * n; X++)
+            {
+                for (int Y = 0; Y < n * n; Y++)
+                {
+                    int[,] map = getState();
+                    for (int j = 0; j < n * n; j++)
+                    {
+                        if (map[X, j] == map[X, Y])
+                        {
+                            error = 1;
+                            return error;
+                        }
+                    }
+                    for (int i = 0; i < n * n; i++)
+                    {
+                        if (map[i, Y] == map[X, Y])
+                        {
+                            error = 2;
+                            return error;
+                        }
+                    }
+                    if (X >= 0 && X <= 2)
+                    {
+                        if (Y >= 0 && Y <= 2)
+                        {
+                            for (int i = 0; i < n; i++)
+                            {
+                                for (int j = 0; j < n; j++)
+                                {
+                                    if (map[i, j] == map[X, Y])
+                                    {
+                                        error = 3;
+                                        return error;
+                                    }
+                                }
+                                i = i + 6;
+                            }
+                        }
+                        if (Y >= 3 && Y <= 5)
+                        {
+                            for (int i = n; i < n * 2; i++)
+                            {
+                                for (int j = n; j < n * 2; j++)
+                                {
+                                    if (map[i, j] == map[X, Y])
+                                    {
+                                        error = 3;
+                                        return error;
+                                    }
+                                }
+                                i = i + 6;
+                            }
+                        }
+                        if (Y >= 6 && Y <= 8)
+                        {
+                            for (int i = n * 2; i < n * 3; i++)
+                            {
+                                for (int j = n * 2; j < n * 3; j++)
+                                {
+                                    if (map[i, j] == map[X, Y])
+                                    {
+                                        error = 3;
+                                        return error;
+                                    }
+                                }
+                                i = i + 6;
+                            }
+                        }
+                    }
+                    if (X >= 3 && X <= 5)
+                    {
+                        if (Y >= 0 && Y <= 2)
+                        {
+                            for (int i = 0; i < n; i++)
+                            {
+                                for (int j = 0; j < n; j++)
+                                {
+                                    if (map[i, j] == map[X, Y])
+                                    {
+                                        error = 3;
+                                        return error;
+                                    }
+                                }
+                                i = i + 6;
+                            }
+                        }
+                        if (Y >= 3 && Y <= 5)
+                        {
+                            for (int i = n; i < n * 2; i++)
+                            {
+                                for (int j = n; j < n * 2; j++)
+                                {
+                                    if (map[i, j] == map[X, Y])
+                                    {
+                                        error = 3;
+                                        return error;
+                                    }
+                                }
+                                i = i + 6;
+                            }
+                        }
+                        if (Y >= 6 && Y <= 8)
+                        {
+                            for (int i = n * 2; i < n * 3; i++)
+                            {
+                                for (int j = n * 2; j < n * 3; j++)
+                                {
+                                    if (map[i, j] == map[X, Y])
+                                    {
+                                        error = 3;
+                                        return error;
+                                    }
+                                }
+                                i = i + 6;
+                            }
+                        }
+                    }
+                    if (X >= 6 && X <= 8)
+                    {
+                        if (Y >= 0 && Y <= 2)
+                        {
+                            for (int i = 0; i < n; i++)
+                            {
+                                for (int j = 0; j < n; j++)
+                                {
+                                    if (map[i, j] == map[X, Y])
+                                    {
+                                        error = 3;
+                                        return error;
+                                    }
+                                }
+                                i = i + 6;
+                            }
+                        }
+                        if (Y >= 3 && Y <= 5)
+                        {
+                            for (int i = n; i < n * 2; i++)
+                            {
+                                for (int j = n; j < n * 2; j++)
+                                {
+                                    if (map[i, j] == map[X, Y])
+                                    {
+                                        error = 3;
+                                        return error;
+                                    }
+                                }
+                                i = i + 6;
+                            }
+                        }
+                        if (Y >= 6 && Y <= 8)
+                        {
+                            for (int i = n * 2; i < n * 3; i++)
+                            {
+                                for (int j = n * 2; j < n * 3; j++)
+                                {
+                                    if (map[i, j] == map[X, Y])
+                                    {
+                                        error = 3;
+                                        return error;
+                                    }
+                                }
+                                i = i + 6;
+                            }
+                        }
+                    }
+                }
+            }
+            return error;
+
         }
     }
 
@@ -354,7 +533,7 @@ namespace Sudoku
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.Clear();
                         Console.WriteLine("Неверный формат ввода.");
-                        Console.ForegroundColor = ConsoleColor.Black; 
+                        Console.ForegroundColor = ConsoleColor.Black;
                     }
                 }
                 while (startMenuActive);
@@ -386,7 +565,7 @@ namespace Sudoku
                                     Console.ForegroundColor = ConsoleColor.Green;
                                     Console.WriteLine("Поздравляю, вы победили");
                                     Console.WriteLine("Ваше время: {0}", Timer_Stop());
-                                    Console.ForegroundColor = ConsoleColor.Black; 
+                                    Console.ForegroundColor = ConsoleColor.Black;
                                     youWinActive = true;
                                     break;
                                 }
@@ -395,7 +574,7 @@ namespace Sudoku
                                     Console.ForegroundColor = ConsoleColor.Red;
                                     Console.Clear();
                                     Console.WriteLine("Решение неверное, проверьте заполнены ли все клетки, нет ли одинаковых значений в каждом ряду и колонке");
-                                    Console.ForegroundColor = ConsoleColor.Black; 
+                                    Console.ForegroundColor = ConsoleColor.Black;
                                 }
 
                             }
@@ -421,43 +600,43 @@ namespace Sudoku
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.Clear();
                         Console.WriteLine("Неверный формат ввода.");
-                        Console.ForegroundColor = ConsoleColor.Black; 
+                        Console.ForegroundColor = ConsoleColor.Black;
                     }
                 }
                 while (youWinActive)
                 {
-                   
-                        Console.WriteLine("Желаете ли вы отправить данные и занять место в сипке лидеров?");
-                        Console.WriteLine("1. Да!");
-                        Console.WriteLine("2. Нет, спасибо");
-                        int input = Convert.ToInt32(Console.ReadLine());
-                        if (input < 1 || (input > 2))
-                        {
-                            throw new Exception("Ошибка");
-                        }
-                        else
-                        {
-                            if (input == 1)
-                            {
-                                Console.WriteLine("Введите ваше имя");
-                                string name = Console.ReadLine();
-                                Record_Write(name);
-                                youWinActive = false;
-                                Console.Clear();
-                                startMenuActive = true;
-                                break;
 
-                            }
-                            if (input == 2)
-                            {
-                                Console.Clear();
-                                youWinActive = false;
-                                startMenuActive = true;
-                                break;
-                            }
+                    Console.WriteLine("Желаете ли вы отправить данные и занять место в сипке лидеров?");
+                    Console.WriteLine("1. Да!");
+                    Console.WriteLine("2. Нет, спасибо");
+                    int input = Convert.ToInt32(Console.ReadLine());
+                    if (input < 1 || (input > 2))
+                    {
+                        throw new Exception("Ошибка");
+                    }
+                    else
+                    {
+                        if (input == 1)
+                        {
+                            Console.WriteLine("Введите ваше имя");
+                            string name = Console.ReadLine();
+                            Record_Write(name);
+                            youWinActive = false;
+                            Console.Clear();
+                            startMenuActive = true;
+                            break;
+
                         }
-                    
-                    
+                        if (input == 2)
+                        {
+                            Console.Clear();
+                            youWinActive = false;
+                            startMenuActive = true;
+                            break;
+                        }
+                    }
+
+
                 }
             }
             while (appActive);
@@ -490,6 +669,21 @@ namespace Sudoku
             }
             Console.Write(String.Format("   {0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}", '-'));
             Console.WriteLine();
+            Error error = (Error)ErrorCheck();
+            switch (error)
+            {
+                case Error.NO:
+                    break;
+                case Error.One:
+                    Console.WriteLine("\nПодсказка: Одинаковые элементы в строке\n");
+                    break;
+                case Error.Two:
+                    Console.WriteLine("\nПодсказка: Одинаковые элементы в столбце\n");
+                    break;
+                case Error.Three:
+                    Console.WriteLine("\nПодсказка: Одинаковые элементы в квадрате 3 на 3\n");
+                    break;
+            }
         }
         private void InputCell()
         {
@@ -516,7 +710,7 @@ namespace Sudoku
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Неверный формат ввода.");
-                    Console.ForegroundColor = ConsoleColor.Black; 
+                    Console.ForegroundColor = ConsoleColor.Black;
                 }
             }
             while (true);
@@ -540,7 +734,7 @@ namespace Sudoku
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Неверный формат ввода.");
-                    Console.ForegroundColor = ConsoleColor.Black; 
+                    Console.ForegroundColor = ConsoleColor.Black;
                 }
             }
             while (true);
@@ -564,7 +758,7 @@ namespace Sudoku
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Неверный формат ввода.");
-                    Console.ForegroundColor = ConsoleColor.Black; 
+                    Console.ForegroundColor = ConsoleColor.Black;
                 }
             }
             while (true);
@@ -584,7 +778,7 @@ namespace Sudoku
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Вы ввели занятую ячейку\nНачните сначала");
                 InputCell();
-                Console.ForegroundColor = ConsoleColor.Black; 
+                Console.ForegroundColor = ConsoleColor.Black;
             }
         }
 
@@ -621,7 +815,7 @@ namespace Sudoku
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Неверный формат ввода.");
-                    Console.ForegroundColor = ConsoleColor.Black; 
+                    Console.ForegroundColor = ConsoleColor.Black;
                 }
             }
             while (true);
