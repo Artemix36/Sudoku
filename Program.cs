@@ -566,7 +566,7 @@ namespace Sudoku
             for (int j = 1; j <= n; j++)
                 Console.Write(String.Format("{0,2}", j));
             Console.WriteLine();
-            Console.Write(String.Format("   {0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}", '-'));
+            Console.Write("   -------------------");
             Console.WriteLine();
             for (int i = 0; i < n; i++)
             {
@@ -584,7 +584,7 @@ namespace Sudoku
                 }
                 Console.WriteLine();
             }
-            Console.Write(String.Format("   {0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}", '-'));
+            Console.Write("   -------------------");
             Console.WriteLine();
             Error error = (Error)ErrorCheck();
             switch (error)
