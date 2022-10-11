@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Globalization;
 using static System.Net.Mime.MediaTypeNames;
@@ -298,7 +298,7 @@ namespace Sudoku
             no_key,
             same_elems_str,
             same_elems_col,
-            same_elems_square,
+        
         }
         protected int ErrorCheck()
         {
@@ -325,65 +325,6 @@ namespace Sudoku
                                 error = 2;
                                 break;
                             }
-                        }
-                        if (X >= 0 && X < n)
-                        {
-                            error = ErroeCheckSqere(X, Y, error);
-                        }
-                        if (X >= n && X < n * 2)
-                        {
-                            error = ErroeCheckSqere(X, Y, error);
-                        }
-                        if (X >= n * 2 && X < n * 3)
-                        {
-                            error = ErroeCheckSqere(X, Y, error);
-                        }
-                    }
-                }
-            }
-            return error;
-        }
-        private int ErroeCheckSqere(int X, int Y, int error)
-        {
-            int[,] map = GetState();
-            if (Y >= 0 && Y < n)
-            {
-                for (int i = 0; i < n; i++)
-                {
-                    for (int j = 0; j < n; j++)
-                    {
-                        if ((map[i, j] == map[X, Y]) && (i != X) && (j != Y))
-                        {
-                            error = 3;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (Y >= n && Y < n * 2)
-            {
-                for (int i = n; i < n * 2; i++)
-                {
-                    for (int j = n; j < n * 2; j++)
-                    {
-                        if ((map[i, j] == map[X, Y]) && (i != X) && (j != Y))
-                        {
-                            error = 3;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (Y >= n * 2 && Y < n * n)
-            {
-                for (int i = n * 2; i < n * 3; i++)
-                {
-                    for (int j = n * 2; j < n * 3; j++)
-                    {
-                        if ((map[i, j] == map[X, Y]) && (i != X) && (j != Y))
-                        {
-                            error = 3;
-                            break;
                         }
                     }
                 }
@@ -578,7 +519,7 @@ namespace Sudoku
             for (int j = 1; j <= n; j++)
                 Console.Write(String.Format("{0,2}", j));
             Console.WriteLine();
-            Console.Write(String.Format("   {0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}", '-'));
+            Console.Write("   --------------------");
             Console.WriteLine();
             for (int i = 0; i < n; i++)
             {
@@ -596,7 +537,7 @@ namespace Sudoku
                 }
                 Console.WriteLine();
             }
-            Console.Write(String.Format("   {0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}", '-'));
+            Console.Write("   -------------------");
             Console.WriteLine();
             Error error = (Error)ErrorCheck();
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -609,9 +550,6 @@ namespace Sudoku
                     break;
                 case Error.same_elems_col:
                     Console.WriteLine("\nПодсказка: Одинаковые элементы в столбце\n");
-                    break;
-                case Error.same_elems_square:
-                    Console.WriteLine("\nПодсказка: Одинаковые элементы в квадрате 3 на 3\n");
                     break;
             }
             Console.ForegroundColor = ConsoleColor.Black;
