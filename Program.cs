@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Globalization;
 using static System.Net.Mime.MediaTypeNames;
@@ -9,8 +9,10 @@ using System.Collections.Generic;
 
 namespace Sudoku
 {
+    // стейт уровень
     class SudokuState
     {
+        // текущая таблица с вводимимыми данными
         int[,] state = new int[9, 9];
         protected void SetState(int[,] newState)
         {
@@ -18,62 +20,66 @@ namespace Sudoku
             Array.Copy(newState, result, 81);
             state = result;
         }
-        protected int[,] getState()
+        protected int[,] GetState()
         {
             return state;
         }
-
-        int[,] Save = new int[9, 9];
-        protected void SetSave(int[,] newSave)
+        // изначальный уровень
+        int[,] save = new int[9, 9];
+        protected void SetSave(int[,] new_save)
         {
             int[,] result = new int[9, 9];
-            Array.Copy(newSave, result, 81);
-            Save = result;
+            Array.Copy(new_save, result, 81);
+            save = result;
         }
-        protected int[,] getSave()
+        protected int[,] GetSave()
         {
-            return Save;
+            return save;
         }
-
-        int[,] Winner = new int[9, 9];
-        protected void SetWinner(int[,] newWinner)
+        // решение
+        int[,] winner = new int[9, 9];
+        protected void SetWinner(int[,] new_winner)
         {
             int[,] result = new int[9, 9];
-            Array.Copy(newWinner, result, 81);
-            Winner = result;
+            Array.Copy(new_winner, result, 81);
+            winner = result;
         }
-        protected int[,] getWinner()
+        protected int[,] GetWinner()
         {
-            return Winner;
+            return winner;
         }
     }
-
+    // бэкенд уровень
     class SudokuMap : SudokuState
     {
-        const int n = 3;
-        private string path = "./records.txt";
-        private int level = 0;
-        private bool is_active = false;
-        private Stopwatch stopwatch = Stopwatch.StartNew();
-        private string elapsedTime = "";
-        protected void Timer_Start()
+        const int n = 3; // размероность подмассива массива 9х9 
+        private string path = "./records.txt"; // путь к файлу со списком лидеров
+        private int level = 0; // значение текущего уровня сложности 0 - дефолт - Лёгкий
+        private bool is_active = false; // индикатор существует ли игра которую можно продолжить
+        private Stopwatch stopwatch = Stopwatch.StartNew(); // таймер
+        private string elapsed_time = ""; // значение таймера
+        // метод запуска таймера
+        protected void TimerStart()
         {
             stopwatch.Start();
         }
-        protected string Timer_Stop()
+        // метод остановки таймера
+        protected string TimerStop()
         {
             stopwatch.Stop();
             TimeSpan ts = stopwatch.Elapsed;
-            elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-            return elapsedTime;
+            elapsed_time = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+            return elapsed_time;
         }
-        protected void Record_Write(string name)
+        // запись в сипок лидеров новых игроков
+        protected void RecordWrite(string name)
         {
             StreamWriter SW = new StreamWriter(path, true, System.Text.Encoding.Default);
-            SW.WriteLine(name + " " + elapsedTime);
+            SW.WriteLine(name + " " + elapsed_time);
             SW.Close();
         }
-        protected List<string> Record_Read()
+        // считывание списка лидеров
+        protected List<string> RecordRead()
         {
             List<string> result = new List<string>();
             using (StreamReader sr = new StreamReader(path))
@@ -86,51 +92,52 @@ namespace Sudoku
             }
             return result;
         }
+        // метод получения текущей позиции вводимых чисел
         protected int[,] Room()
         {
-            return base.getState();
+            return GetState();
         }
 
         private int[,] Transposition(int[,] map)
         {
-            int[,] Tmap = new int[n * n, n * n];
+            int[,] transposition_map = new int[n * n, n * n];
 
             for (int i = 0; i < n * n; i++)
             {
                 for (int j = 0; j < n * n; j++)
                 {
-                    Tmap[i, j] = map[j, i];
+                    transposition_map[i, j] = map[j, i];
                 }
             }
-            map = Tmap;
+            map = transposition_map;
             return (map);
         }
 
         private int[,] Line(int[,] map, Random rnd)
         {
-            int Block = rnd.Next(0, n - 1);
-            int LineOne = rnd.Next(0, n);
-            int LineTwo = rnd.Next(0, n);
-            int Lo = Block * n + LineOne;
-            int Lt = Block * n + LineTwo;
+            int block = rnd.Next(0, n - 1);
+            int line_one = rnd.Next(0, n);
+            int line_two = rnd.Next(0, n);
+            int lo = block * n + line_one;
+            int lt = block * n + line_two;
             for (int j = 0; j < n * n; j++)
-                (map[Lo, j], map[Lt, j]) = (map[Lt, j], map[Lo, j]);
+                (map[lo, j], map[lt, j]) = (map[lt, j], map[lo, j]);
             return (map);
         }
 
         private int[,] Column(int[,] map, Random rnd)
         {
-            int Block = rnd.Next(0, n - 1);
-            int ColumnOne = rnd.Next(0, n);
-            int ColumnTwo = rnd.Next(0, n);
-            int Co = Block * n + ColumnOne;
-            int Ct = Block * n + ColumnTwo;
+            int block = rnd.Next(0, n - 1);
+            int column_one = rnd.Next(0, n);
+            int column_two = rnd.Next(0, n);
+            int co = block * n + column_one;
+            int ct = block * n + column_two;
             for (int i = 0; i < n * n; i++)
-                (map[i, Co], map[i, Ct]) = (map[i, Co], map[i, Ct]);
+                (map[i, co], map[i, ct]) = (map[i, co], map[i, ct]);
 
             return (map);
         }
-
+        // метод - генератор уровня на основе рандома
         private void Hide(ref int[,] map, Random rnd)
         {
             int chance = 0, null_check = 0, removed = 0;
@@ -157,7 +164,7 @@ namespace Sudoku
                         chance = rnd.Next(0, 3);
                         if (chance == 0 && map[i, j] != 0 && removed > 0)
                         {
-                            null_check = Null_Check(map, i, j);
+                            null_check = NullCheck(map, i, j);
                             if (null_check == 0)
                             {
                                 map[i, j] = 0;
@@ -170,7 +177,7 @@ namespace Sudoku
             }
         }
 
-        private int Null_Check(int[,] map, int i, int j)
+        private int NullCheck(int[,] map, int i, int j)
         {
             int line = 0, column = 0;
             for (int k = 0; k < n * n; k++)
@@ -190,22 +197,24 @@ namespace Sudoku
                 return column;
             else return 0;
         }
-
+        // метод смены уровня сложности, автоматически сбрасывает предыдущую игру
         protected void LevelChoosing(int new_level)
         {
             level = new_level;
             is_active = false;
 
         }
+        // метод отдающий выбранный уровень сложности
         protected int GetLevel()
         {
             return level;
         }
+        // метод отдающий информацию о том есть ли игра для продолжнения
         protected bool GetIsActive()
         {
             return is_active;
         }
-
+        // функция создания новой игры
         protected void CreateRoom()
         {
             stopwatch = Stopwatch.StartNew();
@@ -230,21 +239,21 @@ namespace Sudoku
             SetWinner(map);
             Hide(ref map, rnd);
             SetSave(map);
-            base.SetState(map);
-            elapsedTime = "";
+            SetState(map);
+            elapsed_time = "";
         }
         protected void GetCell(int x, int y, int num)
         {
-            int[,] transferCell = getState();
-            transferCell[x - 1, y - 1] = num;
-            SetState(transferCell);
+            int[,] transfer_cell = GetState();
+            transfer_cell[x - 1, y - 1] = num;
+            SetState(transfer_cell);
         }
         protected bool InputValidation(int x, int y)
         {
-            int[,] validationcheck = getSave();
+            int[,] validation_check = GetSave();
 
             bool Validation;
-            if (validationcheck[x - 1, y - 1] != 0)
+            if (validation_check[x - 1, y - 1] != 0)
             {
 
                 Validation = false;
@@ -257,17 +266,17 @@ namespace Sudoku
                 return (Validation);
             }
         }
-
+        // метод проверки результата, сравнивает текущий массив с победными массивом
         protected bool WinCheck()
         {
-            int[,] WinPretendent = getState();
-            int[,] WinVariant = getWinner();
+            int[,] win_pretendent = GetState();
+            int[,] win_variant = GetWinner();
             bool wincheck = true;
-            for (int i = 0; i < WinPretendent.GetLength(0); i++)
+            for (int i = 0; i < win_pretendent.GetLength(0); i++)
             {
-                for (int j = 0; j < WinPretendent.GetLength(1); j++)
+                for (int j = 0; j < win_pretendent.GetLength(1); j++)
                 {
-                    if (WinPretendent[i, j] != WinVariant[i, j])
+                    if (win_pretendent[i, j] != win_variant[i, j])
                     {
                         wincheck = false;
                         break;
@@ -277,120 +286,61 @@ namespace Sudoku
             if (wincheck) is_active = false;
             return wincheck;
         }
+        // дев метод для автозаполнения верными данными
         protected int[,] DeveloperWin()
         {
-            int[,] devel = getWinner();
+            int[,] devel = GetWinner();
             SetState(devel);
             return devel;
         }
         protected enum Error
         {
-            NO,
-            One,
-            Two,
-            Three,
+            no_key,
+            same_elems_str,
+            same_elems_col,
+        
         }
         protected int ErrorCheck()
         {
-            int error=0;
-            int[,] map = getState();
+            int error = 0;
+            int[,] map = GetState();
             for (int X = 0; X < n * n; X++)
             {
                 for (int Y = 0; Y < n * n; Y++)
                 {
-                    for (int j = 0; j < n * n; j++)
+                    if (map[X, Y] != 0)
                     {
-                        if ((map[X, j] == map[X, Y]) & (j!=Y) &(map[X, Y] > 0))
+                        for (int j = 0; j < n * n; j++)
                         {
-                            error = 1;
-                            break;
+                            if ((map[X, j] == map[X, Y]) && (j != Y))
+                            {
+                                error = 1;
+                                break;
+                            }
+                        }
+                        for (int i = 0; i < n * n; i++)
+                        {
+                            if ((map[i, Y] == map[X, Y]) && (i != X))
+                            {
+                                error = 2;
+                                break;
+                            }
                         }
                     }
-                    for (int i = 0; i < n * n; i++)
-                    {
-                        if ((map[i, Y] == map[X, Y]) & (i != X) & (map[X, Y] > 0))
-                        {
-                            error = 2;
-                            break;
-                        }
-                    }
-                    if (X >= 0 & X <= 2 & error==0)
-                    {
-                        error = ErroeCheckSqere(X, Y);
-                    }
-                    if (X >= 3 & X <= 5 & error == 0)
-                    {
-                        error = ErroeCheckSqere(X, Y);
-                    }
-                    if (X >= 6 & X <= 8 & error == 0)
-                    {
-                        error = ErroeCheckSqere(X, Y);
-                    }
-                }
-            }
-            return error;
-
-        }
-        private int ErroeCheckSqere(int X, int Y)
-        {
-            int error = 0;
-            int[,] map = getState();
-            if (Y >= 0 && Y <= 2)
-            {
-                for (int i = 0; i < n; i++)
-                {
-                    for (int j = 0; j < n; j++)
-                    {
-                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y) & (map[X, Y] > 0))
-                        {
-                            error = 3;
-                            break;
-                        }
-                    }
-                    i = i + 6;
-                }
-            }
-            if (Y >= 3 && Y <= 5)
-            {
-                for (int i = n; i < n * 2; i++)
-                {
-                    for (int j = n; j < n * 2; j++)
-                    {
-                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y) & (map[X, Y] > 0))
-                        {
-                            error = 3;
-                            break;
-                        }
-                    }
-                    i = i + 6;
-                }
-            }
-            if (Y >= 6 && Y <= 8)
-            {
-                for (int i = n * 2; i < n * 3; i++)
-                {
-                    for (int j = n * 2; j < n * 3; j++)
-                    {
-                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y) & (map[X, Y] > 0))
-                        {
-                            error = 3;
-                            break;
-                        }
-                    }
-                    i = i + 6;
                 }
             }
             return error;
         }
     }
-
+    // UI-уровень
     class SudokuUi : SudokuMap
     {
+        // вывод меню
         private void StartMenu()
         {
-            bool startMenuActive = true;
-            bool appActive = true;
-            bool youWinActive = false;
+            bool start_menu_active = true;
+            bool app_active = true;
+            bool you_win_active = false;
             do
             {
                 do
@@ -398,7 +348,7 @@ namespace Sudoku
                     try
                     {
                         Console.WriteLine("----МЕНЮ----");
-                        if (base.GetIsActive()) Console.WriteLine("0. Продолжить игру");
+                        if (GetIsActive()) Console.WriteLine("0. Продолжить игру");
                         Console.WriteLine("1. Начать игру");
                         Console.WriteLine("2. Режим сложности");
                         Console.WriteLine("3. Список лидеров");
@@ -412,16 +362,16 @@ namespace Sudoku
                         {
                             if (input == 0)
                             {
-                                Timer_Start();
-                                startMenuActive = false;
+                                TimerStart();
+                                start_menu_active = false;
                                 Console.Clear();
                                 break;
                             }
                             if (input == 1)
                             {
-                                base.CreateRoom();
-                                startMenuActive = false;
-                                Timer_Start();
+                                CreateRoom();
+                                start_menu_active = false;
+                                TimerStart();
                                 Console.Clear();
                                 break;
                             }
@@ -433,7 +383,7 @@ namespace Sudoku
                             if (input == 3)
                             {
                                 Console.Clear();
-                                foreach (string record in Record_Read())
+                                foreach (string record in RecordRead())
                                 {
                                     Console.WriteLine(record);
                                 }
@@ -441,8 +391,8 @@ namespace Sudoku
                             }
                             if (input == 4)
                             {
-                                startMenuActive = false;
-                                appActive = false;
+                                start_menu_active = false;
+                                app_active = false;
                                 break;
                             }
                         }
@@ -455,8 +405,8 @@ namespace Sudoku
                         Console.ForegroundColor = ConsoleColor.Black;
                     }
                 }
-                while (startMenuActive);
-                while (appActive)
+                while (start_menu_active);
+                while (app_active)
                 {
                     try
                     {
@@ -483,9 +433,9 @@ namespace Sudoku
                                     Console.Clear();
                                     Console.ForegroundColor = ConsoleColor.Green;
                                     Console.WriteLine("Поздравляю, вы победили");
-                                    Console.WriteLine("Ваше время: {0}", Timer_Stop());
+                                    Console.WriteLine("Ваше время: {0}", TimerStop());
                                     Console.ForegroundColor = ConsoleColor.Black;
-                                    youWinActive = true;
+                                    you_win_active = true;
                                     break;
                                 }
                                 else
@@ -499,17 +449,17 @@ namespace Sudoku
                             }
                             if (input == 3)
                             {
-                                Timer_Stop();
-                                startMenuActive = true;
+                                TimerStop();
+                                start_menu_active = true;
                                 Console.Clear();
                                 break;
                             }
                             if (input == 4)
                             {
                                 Console.Clear();
-                                base.DeveloperWin();
+                                DeveloperWin();
                                 Console.WriteLine("DEVELOPMENTMODE");
-                                int[,] a = base.getWinner();
+                                int[,] a = GetWinner();
 
                             }
                         }
@@ -522,7 +472,7 @@ namespace Sudoku
                         Console.ForegroundColor = ConsoleColor.Black;
                     }
                 }
-                while (youWinActive)
+                while (you_win_active)
                 {
 
                     Console.WriteLine("Желаете ли вы отправить данные и занять место в сипке лидеров?");
@@ -539,18 +489,18 @@ namespace Sudoku
                         {
                             Console.WriteLine("Введите ваше имя");
                             string name = Console.ReadLine();
-                            Record_Write(name);
-                            youWinActive = false;
+                            RecordWrite(name);
+                            you_win_active = false;
                             Console.Clear();
-                            startMenuActive = true;
+                            start_menu_active = true;
                             break;
 
                         }
                         if (input == 2)
                         {
                             Console.Clear();
-                            youWinActive = false;
-                            startMenuActive = true;
+                            you_win_active = false;
+                            start_menu_active = true;
                             break;
                         }
                     }
@@ -558,17 +508,18 @@ namespace Sudoku
 
                 }
             }
-            while (appActive);
+            while (app_active);
         }
+        // Вывод в консоль поля судоку
         private void PrintSudoku()
         {
             int n = 9;
-            int[,] mas = base.Room();
+            int[,] mas = Room();
             Console.Write(String.Format("{0,3}", '|'));
             for (int j = 1; j <= n; j++)
                 Console.Write(String.Format("{0,2}", j));
             Console.WriteLine();
-            Console.Write(String.Format("   {0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}", '-'));
+            Console.Write("   --------------------");
             Console.WriteLine();
             for (int i = 0; i < n; i++)
             {
@@ -586,24 +537,24 @@ namespace Sudoku
                 }
                 Console.WriteLine();
             }
-            Console.Write(String.Format("   {0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}{0,0}", '-'));
+            Console.Write("   -------------------");
             Console.WriteLine();
             Error error = (Error)ErrorCheck();
+            Console.ForegroundColor = ConsoleColor.Blue;
             switch (error)
             {
-                case Error.NO:
+                case Error.no_key:
                     break;
-                case Error.One:
+                case Error.same_elems_str:
                     Console.WriteLine("\nПодсказка: Одинаковые элементы в строке\n");
                     break;
-                case Error.Two:
+                case Error.same_elems_col:
                     Console.WriteLine("\nПодсказка: Одинаковые элементы в столбце\n");
                     break;
-                case Error.Three:
-                    Console.WriteLine("\nПодсказка: Одинаковые элементы в квадрате 3 на 3\n");
-                    break;
             }
+            Console.ForegroundColor = ConsoleColor.Black;
         }
+        // Метод ввода значение в клетку
         private void InputCell()
         {
             int x_coord;
@@ -683,9 +634,9 @@ namespace Sudoku
             while (true);
             try
             {
-                if (base.InputValidation(x_coord, y_coord))
+                if (InputValidation(x_coord, y_coord))
                 {
-                    base.GetCell(x_coord, y_coord, value);
+                    GetCell(x_coord, y_coord, value);
                 }
                 else
                 {
@@ -700,13 +651,12 @@ namespace Sudoku
                 Console.ForegroundColor = ConsoleColor.Black;
             }
         }
-
-
+        // метод смены уровня сложности
         private void ChangeDifficulty()
         {
-            string[] difficultyArr = new string[3] { "Легкий", "Средниий", "Сложный" };
-            int activeDifficulty = base.GetLevel();
-            Console.WriteLine(String.Format("Текущий уровень сложности: {0,0}", difficultyArr[activeDifficulty]));
+            string[] difficulty_arr = new string[3] { "Легкий", "Средниий", "Сложный" };
+            int active_difficulty = GetLevel();
+            Console.WriteLine(String.Format("Текущий уровень сложности: {0,0}", difficulty_arr[active_difficulty]));
             do
             {
                 try
@@ -722,9 +672,9 @@ namespace Sudoku
                     }
                     else
                     {
-                        if (activeDifficulty != x - 1)
+                        if (active_difficulty != x - 1)
                         {
-                            base.LevelChoosing(x - 1);
+                            LevelChoosing(x - 1);
                         }
                         Console.WriteLine("Сохранено!");
                         break;
