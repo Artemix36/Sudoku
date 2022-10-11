@@ -293,175 +293,92 @@ namespace Sudoku
         protected int ErrorCheck()
         {
             int error=0;
+            int[,] map = getState();
             for (int X = 0; X < n * n; X++)
             {
                 for (int Y = 0; Y < n * n; Y++)
                 {
-                    int[,] map = getState();
                     for (int j = 0; j < n * n; j++)
                     {
-                        if (map[X, j] == map[X, Y])
+                        if ((map[X, j] == map[X, Y]) & (j!=Y))
                         {
                             error = 1;
-                            return error;
                         }
                     }
                     for (int i = 0; i < n * n; i++)
                     {
-                        if (map[i, Y] == map[X, Y])
+                        if ((map[i, Y] == map[X, Y]) & (i != X))
                         {
                             error = 2;
-                            return error;
                         }
                     }
                     if (X >= 0 && X <= 2)
                     {
-                        if (Y >= 0 && Y <= 2)
-                        {
-                            for (int i = 0; i < n; i++)
-                            {
-                                for (int j = 0; j < n; j++)
-                                {
-                                    if (map[i, j] == map[X, Y])
-                                    {
-                                        error = 3;
-                                        return error;
-                                    }
-                                }
-                                i = i + 6;
-                            }
-                        }
-                        if (Y >= 3 && Y <= 5)
-                        {
-                            for (int i = n; i < n * 2; i++)
-                            {
-                                for (int j = n; j < n * 2; j++)
-                                {
-                                    if (map[i, j] == map[X, Y])
-                                    {
-                                        error = 3;
-                                        return error;
-                                    }
-                                }
-                                i = i + 6;
-                            }
-                        }
-                        if (Y >= 6 && Y <= 8)
-                        {
-                            for (int i = n * 2; i < n * 3; i++)
-                            {
-                                for (int j = n * 2; j < n * 3; j++)
-                                {
-                                    if (map[i, j] == map[X, Y])
-                                    {
-                                        error = 3;
-                                        return error;
-                                    }
-                                }
-                                i = i + 6;
-                            }
-                        }
+                        error = ErroeCheckSqere(X, Y);
                     }
                     if (X >= 3 && X <= 5)
                     {
-                        if (Y >= 0 && Y <= 2)
-                        {
-                            for (int i = 0; i < n; i++)
-                            {
-                                for (int j = 0; j < n; j++)
-                                {
-                                    if (map[i, j] == map[X, Y])
-                                    {
-                                        error = 3;
-                                        return error;
-                                    }
-                                }
-                                i = i + 6;
-                            }
-                        }
-                        if (Y >= 3 && Y <= 5)
-                        {
-                            for (int i = n; i < n * 2; i++)
-                            {
-                                for (int j = n; j < n * 2; j++)
-                                {
-                                    if (map[i, j] == map[X, Y])
-                                    {
-                                        error = 3;
-                                        return error;
-                                    }
-                                }
-                                i = i + 6;
-                            }
-                        }
-                        if (Y >= 6 && Y <= 8)
-                        {
-                            for (int i = n * 2; i < n * 3; i++)
-                            {
-                                for (int j = n * 2; j < n * 3; j++)
-                                {
-                                    if (map[i, j] == map[X, Y])
-                                    {
-                                        error = 3;
-                                        return error;
-                                    }
-                                }
-                                i = i + 6;
-                            }
-                        }
+                        error = ErroeCheckSqere(X, Y);
                     }
                     if (X >= 6 && X <= 8)
                     {
-                        if (Y >= 0 && Y <= 2)
-                        {
-                            for (int i = 0; i < n; i++)
-                            {
-                                for (int j = 0; j < n; j++)
-                                {
-                                    if (map[i, j] == map[X, Y])
-                                    {
-                                        error = 3;
-                                        return error;
-                                    }
-                                }
-                                i = i + 6;
-                            }
-                        }
-                        if (Y >= 3 && Y <= 5)
-                        {
-                            for (int i = n; i < n * 2; i++)
-                            {
-                                for (int j = n; j < n * 2; j++)
-                                {
-                                    if (map[i, j] == map[X, Y])
-                                    {
-                                        error = 3;
-                                        return error;
-                                    }
-                                }
-                                i = i + 6;
-                            }
-                        }
-                        if (Y >= 6 && Y <= 8)
-                        {
-                            for (int i = n * 2; i < n * 3; i++)
-                            {
-                                for (int j = n * 2; j < n * 3; j++)
-                                {
-                                    if (map[i, j] == map[X, Y])
-                                    {
-                                        error = 3;
-                                        return error;
-                                    }
-                                }
-                                i = i + 6;
-                            }
-                        }
+                        error = ErroeCheckSqere(X, Y);
                     }
                 }
             }
             return error;
 
+        }
+        private int ErroeCheckSqere(int X, int Y)
+        {
+            int error = 0;
+            int[,] map = getState();
+            if (Y >= 0 && Y <= 2)
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    for (int j = 0; j < n; j++)
+                    {
+                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y))
+                        {
+                            error = 3;
+                            return error;
+                        }
+                    }
+                    i = i + 6;
+                }
+            }
+            if (Y >= 3 && Y <= 5)
+            {
+                for (int i = n; i < n * 2; i++)
+                {
+                    for (int j = n; j < n * 2; j++)
+                    {
+                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y))
+                        {
+                            error = 3;
+                            return error;
+                        }
+                    }
+                    i = i + 6;
+                }
+            }
+            if (Y >= 6 && Y <= 8)
+            {
+                for (int i = n * 2; i < n * 3; i++)
+                {
+                    for (int j = n * 2; j < n * 3; j++)
+                    {
+                        if ((map[i, j] == map[X, Y]) & (i != X) & (j != Y))
+                        {
+                            error = 3;
+                            return error;
+                        }
+                    }
+                    i = i + 6;
+                }
+            }
+            return error;
         }
     }
 
